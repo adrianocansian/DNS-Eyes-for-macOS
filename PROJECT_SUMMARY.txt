@@ -1,0 +1,294 @@
+================================================================================
+DNS CHANGER EYE - macOS Sequoia Edition
+Solução Completa e Automatizada para Rotação de DNS
+================================================================================
+
+VERSÃO: 1.0.0
+DATA: 2026-02-06
+COMPATIBILIDADE: macOS 12.0+ (Testado em Sequoia 15.0+)
+
+================================================================================
+ARQUIVOS DO PROJETO
+================================================================================
+
+1. dns_changer.py (13 KB)
+   - Script principal de rotação de DNS
+   - Detecção automática de interface
+   - Logging completo
+   - Múltiplas opções de linha de comando
+   - 25+ servidores DNS suportados
+
+2. install.sh (8.4 KB)
+   - Instalador automatizado
+   - Verificação de requisitos
+   - Configuração de sudoers
+   - Criação de LaunchAgent
+   - Validação de privilégios
+
+3. uninstall.sh (5.6 KB)
+   - Desinstalador completo
+   - Reset automático de DNS
+   - Confirmação de ações
+   - Limpeza de arquivos
+
+4. com.dns-changer.daemon.plist (1.9 KB)
+   - Template do LaunchAgent
+   - Configuração de execução automática
+   - Logging de stdout/stderr
+   - Variáveis de ambiente
+
+5. README.md (11 KB)
+   - Documentação completa
+   - Guia de instalação
+   - Instruções de uso
+   - Troubleshooting
+   - FAQ
+
+6. QUICKSTART.md (2.7 KB)
+   - Guia de início rápido
+   - Instalação em 3 passos
+   - Comandos essenciais
+   - Configurações comuns
+
+7. CONTRIBUTING.md
+   - Diretrizes de contribuição
+   - Guia de estilo
+   - Processo de desenvolvimento
+   - Instruções de teste
+
+8. CHANGELOG.md
+   - Histórico de versões
+   - Mudanças notáveis
+   - Problemas conhecidos
+   - Roadmap futuro
+
+9. LICENSE (20 KB)
+   - Licença GPL-3.0 completa
+   - Termos e condições
+   - Direitos de autor
+
+10. config.example.json (2.4 KB)
+    - Exemplo de configuração
+    - Estrutura de servidores DNS
+    - Configurações de segurança
+    - Opções de logging
+
+11. .gitignore
+    - Padrões de exclusão para Git
+    - Arquivos de log
+    - Diretórios temporários
+    - Configurações locais
+
+12. PROJECT_SUMMARY.txt (este arquivo)
+    - Resumo do projeto
+    - Estrutura de arquivos
+    - Instruções de uso
+
+================================================================================
+CARACTERÍSTICAS PRINCIPAIS
+================================================================================
+
+✓ Rotação Automática de DNS
+  - Alterna entre 25+ servidores DNS confiáveis
+  - Intervalo configurável (padrão: 5 minutos)
+  - Evita repetição de servidores consecutivos
+
+✓ Execução Automática
+  - Inicia automaticamente ao fazer login
+  - Reinicia automaticamente em caso de falha
+  - Sem intervenção do usuário necessária
+
+✓ Detecção Inteligente
+  - Detecta automaticamente a interface de rede ativa
+  - Suporta múltiplas interfaces (Wi-Fi, Ethernet, etc.)
+  - Validação de endereços IP
+
+✓ Logging Completo
+  - Registra todas as alterações de DNS
+  - Arquivo de log persistente
+  - Erros registrados separadamente
+
+✓ Segurança
+  - Configuração automática de sudoers
+  - Execução sem privilégios permanentes
+  - Código aberto e auditável
+  - Validação de entrada
+
+✓ Facilidade de Uso
+  - Instalação em um comando
+  - Interface simples de linha de comando
+  - Desinstalação completa e limpa
+  - Documentação abrangente
+
+================================================================================
+REQUISITOS
+================================================================================
+
+Sistema Operacional:
+  - macOS 12.0 (Monterey) ou superior
+  - Testado em Sequoia 15.0+
+
+Software:
+  - Python 3.6+ (pré-instalado no macOS 12+)
+  - Bash 3.2+ (padrão no macOS)
+
+Permissões:
+  - Acesso de administrador (sudo)
+
+================================================================================
+INSTALAÇÃO RÁPIDA
+================================================================================
+
+1. Clone o repositório:
+   git clone https://github.com/seu-usuario/dns-changer-macos.git
+   cd dns-changer-macos
+
+2. Execute o instalador:
+   chmod +x install.sh
+   ./install.sh
+
+3. Siga as instruções na tela
+
+4. Pronto! O DNS Changer iniciará automaticamente
+
+================================================================================
+COMANDOS PRINCIPAIS
+================================================================================
+
+Ver DNS atual:
+  dns_changer.py --get
+
+Rotacionar DNS manualmente:
+  dns_changer.py --once
+
+Definir DNS específico:
+  dns_changer.py --set 1.1.1.1 1.0.0.1
+
+Alterar intervalo de rotação:
+  dns_changer.py --interval 600
+
+Resetar DNS para DHCP:
+  dns_changer.py --reset
+
+Ver logs:
+  tail -f ~/.dns_changer/daemon.log
+
+Parar daemon:
+  launchctl unload ~/Library/LaunchAgents/com.dns-changer.daemon.plist
+
+Iniciar daemon:
+  launchctl load ~/Library/LaunchAgents/com.dns-changer.daemon.plist
+
+Desinstalar:
+  bash ~/.dns_changer/uninstall.sh
+
+================================================================================
+SERVIDORES DNS SUPORTADOS
+================================================================================
+
+O script inclui uma lista curada de 25+ servidores DNS públicos:
+
+- Cloudflare: 1.1.1.1, 1.0.0.1
+- Quad9: 9.9.9.9, 149.112.112.112
+- OpenDNS: 208.67.222.222, 208.67.220.220
+- Google: 8.8.8.8, 8.8.4.4
+- Verisign: 64.6.64.6, 64.6.65.6
+- UncensoredDNS: 91.239.100.100, 89.233.43.71
+- CleanBrowsing: 185.228.168.9, 185.228.169.9
+- Yandex: 77.88.8.8, 77.88.8.1
+- AdGuard: 176.103.130.130, 176.103.130.131
+- E mais 16+ servidores
+
+================================================================================
+ESTRUTURA DE DIRETÓRIOS (após instalação)
+================================================================================
+
+/usr/local/bin/
+  └── dns_changer.py
+
+~/.dns_changer/
+  ├── daemon.log
+  ├── daemon_error.log
+  └── uninstall.sh
+
+~/Library/LaunchAgents/
+  └── com.dns-changer.daemon.plist
+
+/etc/sudoers.d/
+  └── dns_changer
+
+================================================================================
+TROUBLESHOOTING RÁPIDO
+================================================================================
+
+Problema: Permissão Negada
+Solução: chmod +x /usr/local/bin/dns_changer.py
+
+Problema: Daemon Não Inicia
+Solução: launchctl load ~/Library/LaunchAgents/com.dns-changer.daemon.plist
+
+Problema: DNS Não Muda
+Solução: Verifique logs (tail -f ~/.dns_changer/daemon.log)
+
+Problema: Erro de Sudoers
+Solução: echo "$USER ALL=(ALL) NOPASSWD: /usr/sbin/networksetup" | sudo tee /etc/sudoers.d/dns_changer
+
+================================================================================
+SEGURANÇA
+================================================================================
+
+O DNS Changer é seguro porque:
+
+1. Usa apenas ferramentas nativas do macOS (networksetup)
+2. Não requer root permanente
+3. Configuração automática de sudoers limitada
+4. Código aberto e auditável
+5. Validação de entrada robusta
+6. Tratamento de erros completo
+7. Logging de todas as operações
+
+================================================================================
+LICENÇA
+================================================================================
+
+Este projeto é licenciado sob GPL-3.0
+Baseado em DNS Changer Eye (BullsEye0)
+
+================================================================================
+SUPORTE E CONTRIBUIÇÕES
+================================================================================
+
+Para reportar bugs ou sugerir melhorias:
+1. Consulte a documentação (README.md)
+2. Verifique os logs (~/.dns_changer/daemon.log)
+3. Abra uma issue no GitHub
+
+Para contribuir:
+1. Leia CONTRIBUTING.md
+2. Faça um Fork do projeto
+3. Crie uma branch para sua feature
+4. Envie um Pull Request
+
+================================================================================
+PRÓXIMOS PASSOS
+================================================================================
+
+1. Leia o README.md para documentação completa
+2. Consulte QUICKSTART.md para início rápido
+3. Configure seu intervalo preferido
+4. Monitore os logs regularmente
+5. Considere usar com VPN para máxima privacidade
+
+================================================================================
+CONTATO E RECURSOS
+================================================================================
+
+Documentação: README.md
+Início Rápido: QUICKSTART.md
+Contribuições: CONTRIBUTING.md
+Histórico: CHANGELOG.md
+Licença: LICENSE
+
+================================================================================
+ÚLTIMA ATUALIZAÇÃO: 2026-02-06
+================================================================================
