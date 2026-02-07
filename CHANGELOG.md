@@ -1,138 +1,138 @@
 # Changelog
 
-Todas as mudanças notáveis neste projeto serão documentadas neste arquivo.
+All notable changes to this project will be documented in this file.
 
-O formato é baseado em [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
-e este projeto adere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
+The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
+and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ---
 
 ## [1.0.0] - 2026-02-06
 
-### Adicionado
+### Added
 
-- **Script Principal** (`dns_changer.py`):
-  - Rotação automática de DNS com 25+ servidores públicos
-  - Detecção automática de interface de rede
-  - Validação de endereços IP
-  - Logging completo com arquivo de log
-  - Tratamento de sinais para encerramento gracioso
-  - Suporte a múltiplas opções de linha de comando
+- **Main Script** (`dns_changer.py`):
+  - Automatic DNS rotation with 25+ public servers
+  - Automatic network interface detection
+  - IP address validation
+  - Complete logging with a log file
+  - Signal handling for graceful shutdown
+  - Support for multiple command-line options
 
-- **Instalador** (`install.sh`):
-  - Instalação automatizada com verificação de requisitos
-  - Detecção de versão do macOS
-  - Configuração automática de sudoers
-  - Criação de LaunchAgent para execução automática
-  - Validação de privilégios de administrador
+- **Installer** (`install.sh`):
+  - Automated installation with requirements check
+  - macOS version detection
+  - Automatic sudoers configuration
+  - LaunchAgent creation for automatic execution
+  - Administrator privilege validation
 
-- **Desinstalador** (`uninstall.sh`):
-  - Remoção completa de todos os arquivos
-  - Reset automático de DNS para DHCP
-  - Confirmação de ações destrutivas
-  - Limpeza de configurações
+- **Uninstaller** (`uninstall.sh`):
+  - Complete removal of all files
+  - Automatic DNS reset to DHCP
+  - Confirmation of destructive actions
+  - Configuration cleanup
 
 - **LaunchDaemon** (`com.dns-changer.daemon.plist`):
-  - Execução automática ao fazer login
-  - Reinicialização automática em caso de falha
-  - Logging de stdout e stderr
-  - Configuração de ambiente
+  - Automatic execution on login
+  - Automatic restart on failure
+  - stdout and stderr logging
+  - Environment configuration
 
-- **Documentação**:
-  - README.md completo com instruções detalhadas
-  - QUICKSTART.md para início rápido
-  - CONTRIBUTING.md para contribuições
-  - CHANGELOG.md (este arquivo)
-  - Exemplos de configuração
+- **Documentation**:
+  - Complete README.md with detailed instructions
+  - QUICKSTART.md for a quick start
+  - CONTRIBUTING.md for contributions
+  - CHANGELOG.md (this file)
+  - Configuration examples
 
-### Características
+### Features
 
-- ✅ Compatível com macOS 12.0+
-- ✅ Suporta Python 3.6+
-- ✅ Usa ferramentas nativas do macOS (networksetup)
-- ✅ Sem dependências externas
-- ✅ Código aberto e auditável
-- ✅ Logging completo
-- ✅ Fácil instalação e desinstalação
+- ✅ Compatible with macOS 12.0+
+- ✅ Supports Python 3.6+
+- ✅ Uses native macOS tools (networksetup)
+- ✅ No external dependencies
+- ✅ Open source and auditable
+- ✅ Complete logging
+- ✅ Easy installation and uninstallation
 
-### Segurança
+### Security
 
-- Configuração automática de sudoers
-- Execução sem privilégios permanentes
-- Validação de entrada
-- Tratamento de erros robusto
+- Automatic sudoers configuration
+- Execution without permanent privileges
+- Input validation
+- Robust error handling
 
 ---
 
-## [Planejado]
+## [Planned]
 
-### Próximas Versões
+### Next Versions
 
-- [ ] Interface gráfica (GUI)
-- [ ] Suporte a perfis de DNS customizados
-- [ ] Integração com Homebrew
-- [ ] Suporte a M1/M2 (arm64) - já funciona
-- [ ] Notificações do sistema
-- [ ] Estatísticas de uso
-- [ ] Suporte a múltiplas interfaces simultâneas
-- [ ] Integração com VPN
-- [ ] Testes automatizados
+- [ ] Graphical User Interface (GUI)
+- [ ] Support for custom DNS profiles
+- [ ] Homebrew integration
+- [ ] M1/M2 support (arm64) - already works
+- [ ] System notifications
+- [ ] Usage statistics
+- [ ] Support for multiple simultaneous interfaces
+- [ ] VPN integration
+- [ ] Automated tests
 - [ ] CI/CD pipeline
 
 ---
 
-## Notas de Compatibilidade
+## Compatibility Notes
 
-### Versões Suportadas
+### Supported Versions
 
 - macOS 12.0 (Monterey) ✅
 - macOS 13.0 (Ventura) ✅
 - macOS 14.0 (Sonoma) ✅
 - macOS 15.0 (Sequoia) ✅
 
-### Requisitos Mínimos
+### Minimum Requirements
 
 - Python 3.6+
 - Bash 3.2+
-- Acesso de administrador
+- Administrator access
 
 ---
 
-## Problemas Conhecidos
+## Known Issues
 
-### Versão 1.0.0
+### Version 1.0.0
 
-1. **VPN pode sobrescrever DNS**: Alguns clientes VPN alteram DNS automaticamente
-2. **System Integrity Protection (SIP)**: Pode bloquear certas operações
-3. **Múltiplas interfaces**: Requer instâncias separadas para cada interface
-
----
-
-## Como Contribuir
-
-Veja [CONTRIBUTING.md](CONTRIBUTING.md) para instruções de contribuição.
+1.  **VPN can override DNS**: Some VPN clients change DNS automatically
+2.  **System Integrity Protection (SIP)**: May block certain operations
+3.  **Multiple interfaces**: Requires separate instances for each interface
 
 ---
 
-## Licença
+## How to Contribute
 
-Este projeto é licenciado sob a GPL-3.0 - veja o arquivo [LICENSE](LICENSE) para detalhes.
-
----
-
-## Autores
-
-- **Adaptação para macOS**: DNS Changer Eye Contributors
-- **Projeto Original**: BullsEye0 (Jolanda de Koff)
+See [CONTRIBUTING.md](CONTRIBUTING.md) for contribution instructions.
 
 ---
 
-## Agradecimentos
+## License
 
-- BullsEye0 pelo projeto original DNS Changer Eye
-- Comunidade macOS por feedback e sugestões
-- Todos os contribuidores
+This project is licensed under the GPL-3.0 - see the [LICENSE](LICENSE) file for details.
 
 ---
 
-**Última atualização**: 2026-02-06
+## Authors
+
+- **macOS Adaptation**: DNS Changer Eye Contributors
+- **Original Project**: BullsEye0 (Jolanda de Koff)
+
+---
+
+## Acknowledgments
+
+- BullsEye0 for the original DNS Changer Eye project
+- The macOS community for feedback and suggestions
+- All contributors
+
+---
+
+**Last updated**: 2026-02-06

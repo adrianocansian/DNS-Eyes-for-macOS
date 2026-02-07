@@ -2,12 +2,12 @@
 # -*- coding: utf-8 -*-
 """
 DNS Changer Eye - macOS Sequoia Edition
-Rotação automática de servidores DNS para privacidade e segurança
-Desenvolvido para macOS Sequoia (15.0+)
+Automatic DNS server rotation for privacy and security
+Developed for macOS Sequoia (15.0+)
 
-Autor: Adaptação para macOS
-Baseado em: DNS Changer Eye (BullsEye0)
-Data: 2026
+Author: macOS Adaptation
+Based on: DNS Changer Eye (BullsEye0)
+Date: 2026
 """
 
 import os
@@ -22,7 +22,7 @@ from datetime import datetime
 from typing import List, Tuple, Optional
 
 # ============================================================================
-# CONFIGURAÇÃO DE LOGGING
+# LOGGING CONFIGURATION
 # ============================================================================
 
 LOG_DIR = Path.home() / ".dns_changer"
@@ -40,7 +40,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # ============================================================================
-# SERVIDORES DNS
+# DNS SERVERS
 # ============================================================================
 
 DNS_SERVERS = [
@@ -97,43 +97,43 @@ DNS_SERVERS = [
 ]
 
 # ============================================================================
-# CLASSE PRINCIPAL
+# MAIN CLASS
 # ============================================================================
 
 class DNSChanger:
-    """Gerenciador de rotação de DNS para macOS"""
-    
+    """DNS rotation manager for macOS"""
+
     def __init__(self, interval: int = 300, interface: Optional[str] = None):
         """
-        Inicializa o DNS Changer
-        
+        Initializes the DNS Changer
+
         Args:
-            interval: Intervalo em segundos para rotação de DNS (padrão: 300 = 5 min)
-            interface: Interface de rede específica (Wi-Fi, Ethernet, etc.)
+            interval: Interval in seconds for DNS rotation (default: 300 = 5 min)
+            interface: Specific network interface (Wi-Fi, Ethernet, etc.)
         """
         self.interval = interval
         self.interface = interface or self._detect_interface()
         self.running = False
         self.current_dns = None
-        
-        # Registrar handlers de sinal para encerramento gracioso
+
+        # Register signal handlers for graceful shutdown
         signal.signal(signal.SIGTERM, self._signal_handler)
         signal.signal(signal.SIGINT, self._signal_handler)
-        
-        logger.info(f"DNS Changer inicializado para interface: {self.interface}")
-    
+
+        logger.info(f"DNS Changer initialized for interface: {self.interface}")
+
     def _signal_handler(self, signum, frame):
-        """Handler para sinais de encerramento"""
-        logger.info("Recebido sinal de encerramento, encerrando...")
+        """Handler for shutdown signals"""
+        logger.info("Received shutdown signal, shutting down...")
         self.running = False
         sys.exit(0)
-    
+
     def _detect_interface(self) -> str:
         """
-        Detecta automaticamente a interface de rede ativa
-        
+        Automatically detects the active network interface
+
         Returns:
-            Nome da interface (ex: 'Wi-Fi', 'Ethernet')
+            Interface name (e.g., 'Wi-Fi', 'Ethernet')
         """
         try:
             result = subprocess.run(
@@ -142,48 +142,48 @@ class DNSChanger:
                 text=True,
                 timeout=5
             )
-            
+
             for line in result.stdout.split('\n'):
                 if 'interface:' in line:
                     interface = line.split(':')[1].strip()
-                    logger.info(f"Interface detectada: {interface}")
+                    logger.info(f"Detected interface: {interface}")
                     return interface
         except Exception as e:
-            logger.warning(f"Erro ao detectar interface: {e}")
-        
-        logger.warning("Usando interface padrão: Wi-Fi")
+            logger.warning(f"Error detecting interface: {e}")
+
+        logger.warning("Using default interface: Wi-Fi")
         return "Wi-Fi"
-    
+
     def _validate_dns(self, dns1: str, dns2: str) -> bool:
         """
-        Valida endereços IP de DNS
-        
+        Validates DNS IP addresses
+
         Args:
-            dns1: Primeiro servidor DNS
-            dns2: Segundo servidor DNS
-            
+            dns1: First DNS server
+            dns2: Second DNS server
+
         Returns:
-            True se válidos, False caso contrário
+            True if valid, False otherwise
         """
         import ipaddress
-        
+
         try:
             ipaddress.ip_address(dns1)
             ipaddress.ip_address(dns2)
             return True
         except ValueError:
-            logger.error(f"DNS inválido: {dns1} ou {dns2}")
+            logger.error(f"Invalid DNS: {dns1} or {dns2}")
             return False
-    
+
     def _run_command(self, command: List[str]) -> Tuple[bool, str]:
         """
-        Executa comando com privilégios de root
-        
+        Executes a command with root privileges
+
         Args:
-            command: Lista com comando e argumentos
-            
+            command: List with command and arguments
+
         Returns:
-            Tupla (sucesso, mensagem)
+            Tuple (success, message)
         """
         try:
             result = subprocess.run(
@@ -192,222 +192,222 @@ class DNSChanger:
                 text=True,
                 timeout=10
             )
-            
+
             if result.returncode == 0:
                 return True, result.stdout.strip()
             else:
                 return False, result.stderr.strip()
         except subprocess.TimeoutExpired:
-            return False, "Comando expirou (timeout)"
+            return False, "Command timed out"
         except Exception as e:
             return False, str(e)
-    
+
     def get_current_dns(self) -> Optional[Tuple[str, str]]:
         """
-        Obtém configuração de DNS atual
-        
+        Gets the current DNS configuration
+
         Returns:
-            Tupla (dns1, dns2) ou None se não conseguir obter
+            Tuple (dns1, dns2) or None if it fails to get it
         """
         success, output = self._run_command(
             ["networksetup", "-getdnsservers", self.interface]
         )
-        
+
         if success and output:
             dns_list = output.strip().split('\n')
             if len(dns_list) >= 2:
                 return (dns_list[0], dns_list[1])
             elif len(dns_list) == 1:
                 return (dns_list[0], dns_list[0])
-        
+
         return None
-    
+
     def set_dns(self, dns1: str, dns2: str) -> bool:
         """
-        Define novos servidores DNS
-        
+        Sets new DNS servers
+
         Args:
-            dns1: Primeiro servidor DNS
-            dns2: Segundo servidor DNS
-            
+            dns1: First DNS server
+            dns2: Second DNS server
+
         Returns:
-            True se bem-sucedido, False caso contrário
+            True if successful, False otherwise
         """
         if not self._validate_dns(dns1, dns2):
             return False
-        
+
         success, output = self._run_command(
             ["sudo", "networksetup", "-setdnsservers", self.interface, dns1, dns2]
         )
-        
+
         if success:
             self.current_dns = (dns1, dns2)
-            logger.info(f"DNS alterado para: {dns1}, {dns2}")
+            logger.info(f"DNS changed to: {dns1}, {dns2}")
             return True
         else:
-            logger.error(f"Erro ao alterar DNS: {output}")
+            logger.error(f"Error changing DNS: {output}")
             return False
-    
+
     def rotate_dns(self) -> bool:
         """
-        Rotaciona para um novo servidor DNS aleatório
-        
+        Rotates to a new random DNS server
+
         Returns:
-            True se bem-sucedido, False caso contrário
+            True if successful, False otherwise
         """
         dns1, dns2 = random.choice(DNS_SERVERS)
-        
-        # Evitar repetir o mesmo DNS
+
+        # Avoid repeating the same DNS
         if self.current_dns == (dns1, dns2):
             return self.rotate_dns()
-        
+
         return self.set_dns(dns1, dns2)
-    
+
     def run(self):
-        """Inicia o loop de rotação de DNS"""
+        """Starts the DNS rotation loop"""
         self.running = True
-        logger.info(f"Iniciando rotação de DNS a cada {self.interval} segundos")
-        
+        logger.info(f"Starting DNS rotation every {self.interval} seconds")
+
         try:
-            # Rotação inicial
+            # Initial rotation
             self.rotate_dns()
-            
-            # Loop principal
+
+            # Main loop
             while self.running:
                 time.sleep(self.interval)
                 self.rotate_dns()
-        
+
         except KeyboardInterrupt:
-            logger.info("Interrompido pelo usuário")
+            logger.info("Interrupted by user")
         except Exception as e:
-            logger.error(f"Erro no loop principal: {e}")
+            logger.error(f"Error in main loop: {e}")
         finally:
             self.running = False
-            logger.info("DNS Changer encerrado")
-    
+            logger.info("DNS Changer stopped")
+
     def run_once(self) -> bool:
-        """Rotaciona DNS uma única vez"""
-        logger.info("Executando rotação única de DNS")
+        """Rotates DNS once"""
+        logger.info("Running single DNS rotation")
         return self.rotate_dns()
-    
+
     def reset_dns(self) -> bool:
         """
-        Reseta DNS para configuração automática (DHCP)
-        
+        Resets DNS to automatic (DHCP) configuration
+
         Returns:
-            True se bem-sucedido, False caso contrário
+            True if successful, False otherwise
         """
         success, output = self._run_command(
             ["sudo", "networksetup", "-setdnsservers", self.interface, "Empty"]
         )
-        
+
         if success:
-            logger.info("DNS resetado para DHCP automático")
+            logger.info("DNS reset to automatic DHCP")
             return True
         else:
-            logger.error(f"Erro ao resetar DNS: {output}")
+            logger.error(f"Error resetting DNS: {output}")
             return False
 
 # ============================================================================
-# FUNÇÕES AUXILIARES
+# HELPER FUNCTIONS
 # ============================================================================
 
 def print_banner():
-    """Exibe banner do aplicativo"""
+    """Displays the application banner"""
     banner = """
     ╔═══════════════════════════════════════════════════════════╗
     ║                                                           ║
     ║          DNS Changer Eye - macOS Sequoia Edition          ║
     ║                                                           ║
-    ║        Rotação Automática de Servidores DNS               ║
+    ║        Automatic Rotation of DNS Servers                  ║
     ║                                                           ║
     ╚═══════════════════════════════════════════════════════════╝
     """
     print(banner)
 
 def main():
-    """Função principal"""
+    """Main function"""
     import argparse
-    
+
     parser = argparse.ArgumentParser(
-        description="DNS Changer Eye para macOS - Rotação automática de DNS"
+        description="DNS Changer Eye for macOS - Automatic DNS rotation"
     )
     parser.add_argument(
         "-i", "--interface",
-        help="Interface de rede (ex: Wi-Fi, Ethernet)",
+        help="Network interface (e.g., Wi-Fi, Ethernet)",
         default=None
     )
     parser.add_argument(
         "-t", "--interval",
         type=int,
         default=300,
-        help="Intervalo de rotação em segundos (padrão: 300)"
+        help="Rotation interval in seconds (default: 300)"
     )
     parser.add_argument(
         "-o", "--once",
         action="store_true",
-        help="Rotaciona DNS uma única vez"
+        help="Rotate DNS once"
     )
     parser.add_argument(
         "-r", "--reset",
         action="store_true",
-        help="Reseta DNS para DHCP automático"
+        help="Reset DNS to automatic DHCP"
     )
     parser.add_argument(
         "-g", "--get",
         action="store_true",
-        help="Exibe configuração de DNS atual"
+        help="Display current DNS configuration"
     )
     parser.add_argument(
         "-s", "--set",
         nargs=2,
         metavar=("DNS1", "DNS2"),
-        help="Define DNS específicos (ex: -s 1.1.1.1 1.0.0.1)"
+        help="Set specific DNS servers (e.g., -s 1.1.1.1 1.0.0.1)"
     )
-    
+
     args = parser.parse_args()
-    
+
     print_banner()
-    
+
     changer = DNSChanger(interval=args.interval, interface=args.interface)
-    
+
     if args.get:
         current = changer.get_current_dns()
         if current:
-            print(f"DNS Atual: {current[0]}, {current[1]}")
+            print(f"Current DNS: {current[0]}, {current[1]}")
         else:
-            print("Não foi possível obter configuração de DNS")
+            print("Could not get DNS configuration")
         return 0
-    
+
     if args.reset:
         if changer.reset_dns():
-            print("DNS resetado com sucesso")
+            print("DNS reset successfully")
             return 0
         else:
-            print("Erro ao resetar DNS")
+            print("Error resetting DNS")
             return 1
-    
+
     if args.set:
         if changer.set_dns(args.set[0], args.set[1]):
-            print(f"DNS definido para: {args.set[0]}, {args.set[1]}")
+            print(f"DNS set to: {args.set[0]}, {args.set[1]}")
             return 0
         else:
-            print("Erro ao definir DNS")
+            print("Error setting DNS")
             return 1
-    
+
     if args.once:
         if changer.run_once():
-            print("DNS rotacionado com sucesso")
+            print("DNS rotated successfully")
             return 0
         else:
-            print("Erro ao rotacionar DNS")
+            print("Error rotating DNS")
             return 1
-    
-    # Modo contínuo (padrão)
-    print(f"Iniciando rotação contínua (intervalo: {args.interval}s)")
-    print("Pressione Ctrl+C para parar")
+
+    # Continuous mode (default)
+    print(f"Starting continuous rotation (interval: {args.interval}s)")
+    print("Press Ctrl+C to stop")
     changer.run()
-    
+
     return 0
 
 if __name__ == "__main__":

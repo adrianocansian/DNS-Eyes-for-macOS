@@ -1,28 +1,28 @@
-# 🚀 Guia de Início Rápido - DNS Changer Eye macOS
+# 🚀 Quick Start Guide - DNS Changer Eye macOS
 
-Comece em menos de 5 minutos!
+Get started in less than 5 minutes!
 
 ---
 
-## ⚡ Instalação Rápida
+## ⚡ Quick Installation
 
-### Passo 1: Baixe o Projeto
+### Step 1: Download the Project
 ```bash
-git clone https://github.com/seu-usuario/dns-changer-macos.git
-cd dns-changer-macos
+git clone https://github.com/adrianocansian/DNS-Eyes-for-macOS.git
+cd DNS-Eyes-for-macOS
 ```
 
-### Passo 2: Execute o Instalador
+### Step 2: Run the Installer
 ```bash
 chmod +x install.sh
 ./install.sh
 ```
 
-Você será solicitado a inserir sua senha de administrador. Isso é necessário para configurar as permissões de DNS.
+You will be prompted to enter your administrator password. This is necessary to configure DNS permissions.
 
-### Passo 3: Pronto! ✅
+### Step 3: Done! ✅
 
-O DNS Changer iniciará automaticamente. Você pode verificar se está funcionando:
+The DNS Changer will start automatically. You can check if it's working:
 
 ```bash
 dns_changer.py --get
@@ -30,55 +30,55 @@ dns_changer.py --get
 
 ---
 
-## 🎮 Comandos Essenciais
+## 🎮 Essential Commands
 
-### Ver DNS Atual
+### Check Current DNS
 ```bash
 dns_changer.py --get
 ```
 
-### Rotacionar DNS Manualmente
+### Rotate DNS Manually
 ```bash
 dns_changer.py --once
 ```
 
-### Parar o Daemon
+### Stop the Daemon
 ```bash
 launchctl unload ~/Library/LaunchAgents/com.dns-changer.daemon.plist
 ```
 
-### Iniciar o Daemon
+### Start the Daemon
 ```bash
 launchctl load ~/Library/LaunchAgents/com.dns-changer.daemon.plist
 ```
 
-### Ver Logs
+### View Logs
 ```bash
 tail -f ~/.dns_changer/daemon.log
 ```
 
-### Desinstalar
+### Uninstall
 ```bash
 bash ~/.dns_changer/uninstall.sh
 ```
 
 ---
 
-## ⚙️ Configurações Comuns
+## ⚙️ Common Configurations
 
-### Alterar Intervalo de Rotação
+### Change Rotation Interval
 
-**Cada 10 minutos:**
+**Every 10 minutes:**
 ```bash
 dns_changer.py --interval 600
 ```
 
-**Cada 30 minutos:**
+**Every 30 minutes:**
 ```bash
 dns_changer.py --interval 1800
 ```
 
-### Usar Interface Específica
+### Use a Specific Interface
 
 **Ethernet:**
 ```bash
@@ -90,7 +90,7 @@ dns_changer.py --interface Ethernet
 dns_changer.py --interface Wi-Fi
 ```
 
-### Definir DNS Específico
+### Set a Specific DNS
 
 **Cloudflare:**
 ```bash
@@ -109,64 +109,64 @@ dns_changer.py --set 9.9.9.9 149.112.112.112
 
 ---
 
-## 🔍 Verificação de Status
+## 🔍 Status Check
 
-### Daemon Rodando?
+### Is the Daemon Running?
 ```bash
 launchctl list | grep dns-changer
 ```
 
-Se aparecer algo como:
+If you see something like:
 ```
 - 0 com.dns-changer.daemon
 ```
 
-Significa que está rodando! ✅
+It means it's running! ✅
 
-### DNS Mudou?
+### Has the DNS Changed?
 ```bash
 dns_changer.py --get
 ```
 
-Execute várias vezes (com intervalo de 5 minutos) para ver o DNS mudar.
+Run it multiple times (with a 5-minute interval) to see the DNS change.
 
 ---
 
-## ❓ Problemas Rápidos
+## ❓ Quick Problems
 
-### "Permissão Negada"
+### "Permission Denied"
 ```bash
 chmod +x /usr/local/bin/dns_changer.py
 ```
 
-### Daemon Não Inicia
+### Daemon Doesn't Start
 ```bash
 launchctl load ~/Library/LaunchAgents/com.dns-changer.daemon.plist
 ```
 
-### Resetar DNS
+### Reset DNS
 ```bash
 dns_changer.py --reset
 ```
 
 ---
 
-## 📖 Próximos Passos
+## 📖 Next Steps
 
-1. **Leia o README completo**: `README.md`
-2. **Configure seu intervalo preferido**: Edite o `.plist` ou use `--interval`
-3. **Monitore os logs**: `tail -f ~/.dns_changer/daemon.log`
-4. **Considere privacidade**: Use com VPN para máxima proteção
-
----
-
-## 💡 Dicas
-
-- ✅ Deixe rodando em background para máxima privacidade
-- ✅ Combine com VPN para segurança extra
-- ✅ Monitore logs periodicamente
-- ✅ Atualize o script regularmente
+1. **Read the full README**: `README.md`
+2. **Configure your preferred interval**: Edit the `.plist` file or use `--interval`
+3. **Monitor the logs**: `tail -f ~/.dns_changer/daemon.log`
+4. **Consider privacy**: Use with a VPN for maximum protection
 
 ---
 
-**Aproveite a privacidade! 🔒**
+## 💡 Tips
+
+- ✅ Let it run in the background for maximum privacy
+- ✅ Combine with a VPN for extra security
+- ✅ Monitor logs periodically
+- ✅ Update the script regularly
+
+---
+
+**Enjoy your privacy! 🔒**

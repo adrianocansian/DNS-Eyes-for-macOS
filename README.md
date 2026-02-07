@@ -1,236 +1,236 @@
 # DNS Changer Eye - macOS Sequoia Edition
 
-Uma solução completa e automatizada para rotação contínua de servidores DNS no macOS Sequoia, com foco em privacidade, segurança e facilidade de uso.
+A complete and automated solution for continuous DNS server rotation on macOS Sequoia, focusing on privacy, security, and ease of use.
 
-## 📋 Índice
+## 📋 Table of Contents
 
-- [Características](#características)
-- [Requisitos](#requisitos)
-- [Instalação](#instalação)
-- [Uso](#uso)
-- [Configuração](#configuração)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Configuration](#configuration)
 - [Troubleshooting](#troubleshooting)
-- [Desinstalação](#desinstalação)
-- [Segurança](#segurança)
+- [Uninstallation](#uninstallation)
+- [Security](#security)
 - [FAQ](#faq)
 
 ---
 
-## ✨ Características
+## ✨ Features
 
-### Funcionalidades Principais
+### Main Features
 
-- **Rotação Automática de DNS**: Alterna entre 25+ servidores DNS confiáveis a cada 5 minutos (configurável)
-- **Execução Automática**: Inicia automaticamente ao fazer login via LaunchDaemon
-- **Detecção Inteligente**: Detecta automaticamente a interface de rede ativa
-- **Logging Completo**: Registra todas as alterações e erros em arquivo de log
-- **Interface Simples**: Linha de comando intuitiva com múltiplas opções
-- **Segurança**: Configuração automática de sudoers para execução sem senha
-- **Reversível**: Fácil desinstalação com reset automático de DNS
+- **Automatic DNS Rotation**: Switches between 25+ trusted DNS servers every 5 minutes (configurable).
+- **Automatic Execution**: Starts automatically on login via LaunchDaemon.
+- **Intelligent Detection**: Automatically detects the active network interface.
+- **Complete Logging**: Records all changes and errors to a log file.
+- **Simple Interface**: Intuitive command line with multiple options.
+- **Security**: Automatic sudoers configuration for passwordless execution.
+- **Reversible**: Easy uninstallation with automatic DNS reset.
 
-### Servidores DNS Suportados
+### Supported DNS Servers
 
-O script inclui uma lista curada de 25+ servidores DNS públicos e confiáveis:
+The script includes a curated list of 25+ public and trusted DNS servers:
 
 - **Cloudflare**: 1.1.1.1, 1.0.0.1
 - **Quad9**: 9.9.9.9, 149.112.112.112
 - **OpenDNS**: 208.67.222.222, 208.67.220.220
 - **Google**: 8.8.8.8, 8.8.4.4
 - **Verisign**: 64.6.64.6, 64.6.65.6
-- E mais 15+ servidores
+- And 15+ more servers
 
 ---
 
-## 🔧 Requisitos
+## 🔧 Requirements
 
-### Sistema Operacional
-- **macOS 12.0 ou superior** (testado em Sequoia 15.0+)
-- Acesso de administrador
+### Operating System
+- **macOS 12.0 or higher** (tested on Sequoia 15.0+)
+- Administrator access
 
 ### Software
-- **Python 3.6+** (pré-instalado no macOS 12+)
-- **Bash 3.2+** (padrão no macOS)
+- **Python 3.6+** (pre-installed on macOS 12+)
+- **Bash 3.2+** (default on macOS)
 
-### Permissões
-- Privilégios de `sudo` (será solicitado durante a instalação)
+### Permissions
+- `sudo` privileges (will be requested during installation)
 
 ---
 
-## 📦 Instalação
+## 📦 Installation
 
-### Método 1: Instalação Automática (Recomendado)
+### Method 1: Automatic Installation (Recommended)
 
-1. **Clone ou baixe o repositório**:
+1. **Clone or download the repository**:
 ```bash
-git clone https://github.com/seu-usuario/dns-changer-macos.git
-cd dns-changer-macos
+git clone https://github.com/adrianocansian/DNS-Eyes-for-macOS.git
+cd DNS-Eyes-for-macOS
 ```
 
-2. **Execute o instalador**:
+2. **Run the installer**:
 ```bash
 chmod +x install.sh
 ./install.sh
 ```
 
-3. **Siga as instruções** na tela. O script solicitará sua senha de administrador.
+3. **Follow the on-screen instructions**. The script will ask for your administrator password.
 
-4. **Pronto!** O DNS Changer iniciará automaticamente.
+4. **Done!** The DNS Changer will start automatically.
 
-### Método 2: Instalação Manual
+### Method 2: Manual Installation
 
-Se preferir instalar manualmente:
+If you prefer to install manually:
 
 ```bash
-# 1. Copiar script principal
+# 1. Copy the main script
 sudo cp dns_changer.py /usr/local/bin/
 sudo chmod +x /usr/local/bin/dns_changer.py
 
-# 2. Criar diretório de configuração
+# 2. Create the configuration directory
 mkdir -p ~/.dns_changer
 
-# 3. Configurar sudoers
+# 3. Configure sudoers
 echo "$USER ALL=(ALL) NOPASSWD: /usr/sbin/networksetup" | sudo tee /etc/sudoers.d/dns_changer
 
-# 4. Copiar LaunchAgent
+# 4. Copy the LaunchAgent
 cp com.dns-changer.daemon.plist ~/Library/LaunchAgents/
 sed -i '' "s|__HOME__|$HOME|g" ~/Library/LaunchAgents/com.dns-changer.daemon.plist
 sed -i '' "s|__USER__|$USER|g" ~/Library/LaunchAgents/com.dns-changer.daemon.plist
 
-# 5. Carregar daemon
+# 5. Load the daemon
 launchctl load ~/Library/LaunchAgents/com.dns-changer.daemon.plist
 ```
 
 ---
 
-## 🚀 Uso
+## 🚀 Usage
 
-### Modo Contínuo (Padrão)
+### Continuous Mode (Default)
 
-Inicia a rotação automática de DNS:
+Starts automatic DNS rotation:
 
 ```bash
 dns_changer.py
 ```
 
-Pressione `Ctrl+C` para parar.
+Press `Ctrl+C` to stop.
 
-### Opções de Linha de Comando
+### Command-Line Options
 
 ```bash
-# Rotacionar DNS uma única vez
+# Rotate DNS once
 dns_changer.py --once
 
-# Especificar interface de rede
+# Specify network interface
 dns_changer.py --interface Ethernet
 
-# Alterar intervalo de rotação (em segundos)
+# Change rotation interval (in seconds)
 dns_changer.py --interval 600
 
-# Obter configuração de DNS atual
+# Get current DNS configuration
 dns_changer.py --get
 
-# Definir DNS específicos
+# Set specific DNS servers
 dns_changer.py --set 1.1.1.1 1.0.0.1
 
-# Resetar DNS para DHCP automático
+# Reset DNS to automatic (DHCP)
 dns_changer.py --reset
 
-# Exibir ajuda
+# Display help
 dns_changer.py --help
 ```
 
-### Exemplos Práticos
+### Practical Examples
 
 ```bash
-# Rotacionar a cada 10 minutos
+# Rotate every 10 minutes
 dns_changer.py --interval 600
 
-# Usar apenas Ethernet
+# Use only Ethernet
 dns_changer.py --interface Ethernet --interval 300
 
-# Definir DNS do Cloudflare
+# Set Cloudflare DNS
 dns_changer.py --set 1.1.1.1 1.0.0.1
 
-# Verificar DNS atual
+# Check current DNS
 dns_changer.py --get
 
-# Resetar para DHCP
+# Reset to DHCP
 dns_changer.py --reset
 ```
 
 ---
 
-## ⚙️ Configuração
+## ⚙️ Configuration
 
-### Alterar Intervalo de Rotação
+### Change Rotation Interval
 
-Edite o arquivo LaunchAgent:
+Edit the LaunchAgent file:
 
 ```bash
 nano ~/Library/LaunchAgents/com.dns-changer.daemon.plist
 ```
 
-Procure por:
+Look for:
 ```xml
 <string>300</string>
 ```
 
-Altere `300` para o intervalo desejado em segundos:
-- `300` = 5 minutos (padrão)
-- `600` = 10 minutos
-- `1800` = 30 minutos
+Change `300` to the desired interval in seconds:
+- `300` = 5 minutes (default)
+- `600` = 10 minutes
+- `1800` = 30 minutes
 
-Depois recarregue:
+Then reload:
 ```bash
 launchctl unload ~/Library/LaunchAgents/com.dns-changer.daemon.plist
 launchctl load ~/Library/LaunchAgents/com.dns-changer.daemon.plist
 ```
 
-### Especificar Interface de Rede
+### Specify Network Interface
 
-Se você tem múltiplas interfaces (Wi-Fi, Ethernet, VPN), pode especificar qual usar:
+If you have multiple interfaces (Wi-Fi, Ethernet, VPN), you can specify which one to use:
 
 ```bash
-# Listar interfaces disponíveis
+# List available interfaces
 networksetup -listallnetworkservices
 
-# Usar interface específica
+# Use a specific interface
 dns_changer.py --interface Ethernet
 ```
 
-### Adicionar Servidores DNS Customizados
+### Add Custom DNS Servers
 
-Edite `dns_changer.py` e modifique a lista `DNS_SERVERS`:
+Edit `dns_changer.py` and modify the `DNS_SERVERS` list:
 
 ```python
 DNS_SERVERS = [
-    ("1.1.1.1", "1.0.0.1"),      # Seu servidor 1
-    ("seu.dns.1", "seu.dns.2"),  # Seu servidor 2
-    # ... mais servidores
+    ("1.1.1.1", "1.0.0.1"),      # Your server 1
+    ("your.dns.1", "your.dns.2"),  # Your server 2
+    # ... more servers
 ]
 ```
 
 ---
 
-## 📊 Monitoramento
+## 📊 Monitoring
 
-### Ver Status do Daemon
+### Check Daemon Status
 
 ```bash
-# Verificar se está rodando
+# Check if it's running
 launchctl list | grep dns-changer
 
-# Ver logs em tempo real
+# View logs in real-time
 tail -f ~/.dns_changer/daemon.log
 
-# Ver logs de erro
+# View error logs
 tail -f ~/.dns_changer/daemon_error.log
 
-# Ver todos os logs
+# View all logs
 log show --predicate 'process == "dns_changer.py"' --last 1h
 ```
 
-### Verificar DNS Atual
+### Check Current DNS
 
 ```bash
 # Via script
@@ -239,7 +239,7 @@ dns_changer.py --get
 # Via networksetup
 networksetup -getdnsservers Wi-Fi
 
-# Via cat (método tradicional)
+# Via cat (traditional method)
 cat /etc/resolv.conf
 ```
 
@@ -247,181 +247,181 @@ cat /etc/resolv.conf
 
 ## 🔧 Troubleshooting
 
-### Problema: "Permissão Negada" ao Executar
+### Problem: "Permission Denied" when executing
 
-**Solução**:
+**Solution**:
 ```bash
 chmod +x /usr/local/bin/dns_changer.py
 ```
 
-### Problema: Daemon Não Inicia Automaticamente
+### Problem: Daemon does not start automatically
 
-**Verificar**:
+**Check**:
 ```bash
-# Ver se está carregado
+# Check if it's loaded
 launchctl list | grep dns-changer
 
-# Recarregar
+# Reload
 launchctl unload ~/Library/LaunchAgents/com.dns-changer.daemon.plist
 launchctl load ~/Library/LaunchAgents/com.dns-changer.daemon.plist
 ```
 
-### Problema: "sudo: networksetup: command not found"
+### Problem: "sudo: networksetup: command not found"
 
-**Solução**: Reconfigurar sudoers:
+**Solution**: Reconfigure sudoers:
 ```bash
 echo "$USER ALL=(ALL) NOPASSWD: /usr/sbin/networksetup" | sudo tee /etc/sudoers.d/dns_changer
 ```
 
-### Problema: DNS Não Muda
+### Problem: DNS does not change
 
-**Verificar**:
-1. Interface correta: `dns_changer.py --get`
-2. Privilégios: `sudo -l | grep networksetup`
+**Check**:
+1. Correct interface: `dns_changer.py --get`
+2. Privileges: `sudo -l | grep networksetup`
 3. Logs: `tail -f ~/.dns_changer/daemon.log`
 
-### Problema: VPN Sobrescreve DNS
+### Problem: VPN overrides DNS
 
-**Solução**: Alguns clientes VPN sobrescrevem DNS. Você pode:
-- Desabilitar VPN temporariamente
-- Usar DNS do VPN
-- Reconfigurar após conectar VPN
+**Solution**: Some VPN clients override DNS. You can:
+- Temporarily disable the VPN
+- Use the VPN's DNS
+- Reconfigure after connecting to the VPN
 
 ---
 
-## 🗑️ Desinstalação
+## 🗑️ Uninstallation
 
-### Método Automático
+### Automatic Method
 
 ```bash
 bash ~/.dns_changer/uninstall.sh
 ```
 
-### Método Manual
+### Manual Method
 
 ```bash
-# 1. Descarregar daemon
+# 1. Unload the daemon
 launchctl unload ~/Library/LaunchAgents/com.dns-changer.daemon.plist
 
-# 2. Remover script
+# 2. Remove the script
 sudo rm /usr/local/bin/dns_changer.py
 
-# 3. Remover sudoers
+# 3. Remove sudoers configuration
 sudo rm /etc/sudoers.d/dns_changer
 
-# 4. Remover arquivo de daemon
+# 4. Remove the daemon file
 rm ~/Library/LaunchAgents/com.dns-changer.daemon.plist
 
-# 5. Remover diretório de configuração
+# 5. Remove the configuration directory
 rm -rf ~/.dns_changer
 
-# 6. Resetar DNS (opcional)
+# 6. Reset DNS (optional)
 sudo networksetup -setdnsservers Wi-Fi Empty
 ```
 
 ---
 
-## 🔒 Segurança
+## 🔒 Security
 
-### Considerações de Segurança
+### Security Considerations
 
-1. **Privilégios de Root**: O script requer `sudo` para alterar DNS. Isso é necessário e seguro.
+1. **Root Privileges**: The script requires `sudo` to change DNS. This is necessary and secure.
 
-2. **Sudoers sem Senha**: A instalação configura `sudo` para executar `networksetup` sem senha. Isso é seguro porque:
-   - Limitado apenas a `networksetup`
-   - Requer que o usuário já esteja logado
-   - O arquivo `/etc/sudoers.d/dns_changer` tem permissões restritas (440)
+2. **Passwordless Sudoers**: The installation configures `sudo` to run `networksetup` without a password. This is secure because:
+   - It's limited only to `networksetup`
+   - It requires the user to be already logged in
+   - The `/etc/sudoers.d/dns_changer` file has restricted permissions (440)
 
-3. **Logs**: Os logs contêm informações de DNS alterados. Verifique permissões:
+3. **Logs**: The logs contain information about changed DNS. Check permissions:
    ```bash
    ls -la ~/.dns_changer/
    ```
 
-4. **LaunchDaemon**: Executa com privilégios do usuário (não root), aumentando segurança.
+4. **LaunchDaemon**: Runs with user privileges (not root), increasing security.
 
-5. **Código Aberto**: Todo o código é transparente e pode ser auditado.
+5. **Open Source**: All code is transparent and can be audited.
 
-### Boas Práticas
+### Best Practices
 
-- Mantenha o script atualizado
-- Revise os servidores DNS periodicamente
-- Monitore os logs regularmente
-- Use em redes confiáveis
-- Considere usar VPN + DNS Changer para máxima privacidade
+- Keep the script updated
+- Periodically review the DNS servers
+- Regularly monitor the logs
+- Use on trusted networks
+- Consider using VPN + DNS Changer for maximum privacy
 
 ---
 
 ## ❓ FAQ
 
-### P: O DNS Changer é seguro?
-**R**: Sim. O script usa apenas ferramentas nativas do macOS (`networksetup`) e não requer root permanente.
+### Q: Is DNS Changer secure?
+**A**: Yes. The script uses only native macOS tools (`networksetup`) and does not require permanent root.
 
-### P: Qual é o impacto de performance?
-**R**: Mínimo. O script usa ~5-10MB de memória e consome CPU apenas durante rotações.
+### Q: What is the performance impact?
+**A**: Minimal. The script uses ~5-10MB of memory and consumes CPU only during rotations.
 
-### P: Posso usar com VPN?
-**R**: Sim, mas a VPN pode sobrescrever as configurações de DNS. Nesse caso, use o DNS da VPN.
+### Q: Can I use it with a VPN?
+**A**: Yes, but the VPN may override the DNS settings. In that case, use the VPN's DNS.
 
-### P: Como saber se está funcionando?
-**R**: Execute `dns_changer.py --get` para ver o DNS atual, ou verifique os logs.
+### Q: How do I know if it's working?
+**A**: Run `dns_changer.py --get` to see the current DNS, or check the logs.
 
-### P: Posso alterar o intervalo de rotação?
-**R**: Sim, edite o arquivo `.plist` ou use `--interval` na linha de comando.
+### Q: Can I change the rotation interval?
+**A**: Yes, edit the `.plist` file or use `--interval` on the command line.
 
-### P: O que acontece se desinstalar?
-**R**: O script remove todos os arquivos e reseta o DNS para DHCP automático.
+### Q: What happens if I uninstall?
+**A**: The script removes all files and resets the DNS to automatic (DHCP).
 
-### P: Funciona em redes corporativas?
-**R**: Pode haver restrições. Consulte seu administrador de rede.
+### Q: Does it work on corporate networks?
+**A**: There may be restrictions. Consult your network administrator.
 
-### P: Posso usar múltiplas interfaces?
-**R**: Sim, execute instâncias separadas com `--interface` diferente.
+### Q: Can I use multiple interfaces?
+**A**: Yes, run separate instances with a different `--interface`.
 
-### P: Qual é o melhor intervalo de rotação?
-**R**: 5-10 minutos (300-600 segundos) é recomendado. Intervalos muito curtos podem causar instabilidade.
-
----
-
-## 📝 Licença
-
-Este projeto é baseado em DNS Changer Eye (BullsEye0) e mantém compatibilidade com GPL-3.0.
+### Q: What is the best rotation interval?
+**A**: 5-10 minutes (300-600 seconds) is recommended. Very short intervals can cause instability.
 
 ---
 
-## 🤝 Contribuições
+## 📝 License
 
-Contribuições são bem-vindas! Por favor:
-
-1. Faça um Fork do projeto
-2. Crie uma branch para sua feature (`git checkout -b feature/AmazingFeature`)
-3. Commit suas mudanças (`git commit -m 'Add some AmazingFeature'`)
-4. Push para a branch (`git push origin feature/AmazingFeature`)
-5. Abra um Pull Request
+This project is based on DNS Changer Eye (BullsEye0) and maintains compatibility with GPL-3.0.
 
 ---
 
-## 📞 Suporte
+## 🤝 Contributing
 
-Se encontrar problemas:
+Contributions are welcome! Please:
 
-1. Verifique os [Troubleshooting](#troubleshooting)
-2. Consulte os logs: `tail -f ~/.dns_changer/daemon.log`
-3. Abra uma issue no GitHub
+1. Fork the project
+2. Create a branch for your feature (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
+
+---
+
+## 📞 Support
+
+If you encounter problems:
+
+1. Check the [Troubleshooting](#troubleshooting) section
+2. Check the logs: `tail -f ~/.dns_changer/daemon.log`
+3. Open an issue on GitHub
 
 ---
 
 ## 🎯 Roadmap
 
-- [ ] Interface gráfica (GUI)
-- [ ] Suporte a perfis de DNS customizados
-- [ ] Integração com Homebrew
-- [ ] Suporte a M1/M2 (arm64)
-- [ ] Notificações do sistema
-- [ ] Estatísticas de uso
+- [ ] Graphical User Interface (GUI)
+- [ ] Support for custom DNS profiles
+- [ ] Homebrew integration
+- [ ] M1/M2 support (arm64)
+- [ ] System notifications
+- [ ] Usage statistics
 
 ---
 
-## 📚 Referências
+## 📚 References
 
 - [Apple LaunchDaemon Documentation](https://developer.apple.com/library/archive/documentation/MacOSX/Conceptual/BPSystemStartup/Chapters/CreatingLaunchDaemons.html)
 - [networksetup Manual](https://ss64.com/osx/networksetup.html)
@@ -429,6 +429,6 @@ Se encontrar problemas:
 
 ---
 
-**Desenvolvido com ❤️ para macOS Sequoia**
+**Developed with ❤️ for macOS Sequoia**
 
-Última atualização: 2026
+Last updated: 2026

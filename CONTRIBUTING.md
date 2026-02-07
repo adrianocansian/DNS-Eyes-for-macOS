@@ -1,162 +1,162 @@
-# Contribuindo para DNS Changer Eye - macOS
+# Contributing to DNS Changer Eye - macOS
 
-Obrigado por considerar contribuir para o DNS Changer Eye! Este documento fornece diretrizes e instruções para contribuir ao projeto.
+Thank you for considering contributing to DNS Changer Eye! This document provides guidelines and instructions for contributing to the project.
 
-## Código de Conduta
+## Code of Conduct
 
-Este projeto adere a um Código de Conduta. Ao participar, você concorda em manter um ambiente respeitoso e inclusivo.
+This project adheres to a Code of Conduct. By participating, you agree to maintain a respectful and inclusive environment.
 
 ---
 
-## Como Contribuir
+## How to Contribute
 
-### Reportar Bugs
+### Reporting Bugs
 
-Antes de criar um relatório de bug, verifique a lista de problemas, pois você pode descobrir que o erro já foi relatado.
+Before creating a bug report, please check the issue list as you may find that the bug has already been reported.
 
-Ao relatar um bug, inclua:
+When reporting a bug, please include:
 
-- **Título descritivo**
-- **Descrição exata do comportamento observado**
-- **Comportamento esperado**
-- **Passos para reproduzir o problema**
-- **Exemplos específicos**
-- **Versão do macOS**
-- **Versão do Python**
-- **Logs relevantes**
+- **A descriptive title**
+- **An exact description of the observed behavior**
+- **The expected behavior**
+- **Steps to reproduce the problem**
+- **Specific examples**
+- **macOS version**
+- **Python version**
+- **Relevant logs**
 
-### Sugerir Melhorias
+### Suggesting Enhancements
 
-Sugestões de melhorias são bem-vindas! Ao criar uma sugestão de melhoria, inclua:
+Enhancement suggestions are welcome! When creating an enhancement suggestion, please include:
 
-- **Título descritivo**
-- **Descrição detalhada da melhoria sugerida**
-- **Exemplos de como a melhoria funcionaria**
-- **Por que essa melhoria seria útil**
+- **A descriptive title**
+- **A detailed description of the suggested enhancement**
+- **Examples of how the enhancement would work**
+- **Why this enhancement would be useful**
 
 ### Pull Requests
 
-- Siga o estilo de código existente
-- Inclua testes apropriados
-- Atualize a documentação conforme necessário
-- Termine todos os arquivos com uma nova linha
+- Follow the existing code style
+- Include appropriate tests
+- Update the documentation as needed
+- End all files with a new line
 
 ---
 
-## Guia de Estilo
+## Style Guide
 
 ### Python
 
-- Siga [PEP 8](https://www.python.org/dev/peps/pep-0008/)
-- Use nomes descritivos para variáveis e funções
-- Adicione docstrings para todas as funções públicas
-- Mantenha linhas com menos de 100 caracteres
+- Follow [PEP 8](https://www.python.org/dev/peps/pep-0008/)
+- Use descriptive names for variables and functions
+- Add docstrings for all public functions
+- Keep lines under 100 characters
 
 ```python
 def example_function(parameter1: str, parameter2: int) -> bool:
     """
-    Descrição breve da função.
+    Brief description of the function.
     
     Args:
-        parameter1: Descrição do parâmetro 1
-        parameter2: Descrição do parâmetro 2
+        parameter1: Description of parameter 1
+        parameter2: Description of parameter 2
         
     Returns:
-        Descrição do retorno
+        Description of the return value
     """
     pass
 ```
 
 ### Bash
 
-- Use `#!/bin/bash` como shebang
-- Adicione comentários para seções principais
-- Use `set -e` para sair em caso de erro
-- Cite variáveis: `"$variable"`
+- Use `#!/bin/bash` as the shebang
+- Add comments for main sections
+- Use `set -e` to exit on error
+- Quote variables: `"$variable"`
 
 ```bash
 #!/bin/bash
 
-# Descrição do script
+# Description of the script
 set -e
 
-# Função exemplo
+# Example function
 example_function() {
     local variable="value"
-    echo "Resultado: $variable"
+    echo "Result: $variable"
 }
 ```
 
 ### Markdown
 
-- Use títulos apropriados
-- Mantenha linhas com menos de 80 caracteres
-- Use listas numeradas para procedimentos
-- Use listas com bullets para itens
+- Use appropriate titles
+- Keep lines under 80 characters
+- Use numbered lists for procedures
+- Use bullet points for items
 
 ---
 
-## Processo de Desenvolvimento
+## Development Process
 
-1. **Fork o repositório**
-2. **Clone seu fork**: `git clone https://github.com/seu-usuario/dns-changer-macos.git`
-3. **Crie uma branch**: `git checkout -b feature/sua-feature`
-4. **Faça suas mudanças**
-5. **Teste suas mudanças**
-6. **Commit suas mudanças**: `git commit -m 'Adiciona sua feature'`
-7. **Push para a branch**: `git push origin feature/sua-feature`
-8. **Abra um Pull Request**
+1. **Fork the repository**
+2. **Clone your fork**: `git clone https://github.com/your-username/dns-changer-macos.git`
+3. **Create a branch**: `git checkout -b feature/your-feature`
+4. **Make your changes**
+5. **Test your changes**
+6. **Commit your changes**: `git commit -m 'Add your feature'`
+7. **Push to the branch**: `git push origin feature/your-feature`
+8. **Open a Pull Request**
 
 ---
 
-## Testes
+## Testing
 
-Antes de submeter um Pull Request, teste suas mudanças:
+Before submitting a Pull Request, test your changes:
 
 ```bash
-# Teste manual
+# Manual test
 python3 dns_changer.py --help
 python3 dns_changer.py --once
 python3 dns_changer.py --get
 
-# Teste de instalação
+# Installation test
 ./install.sh
 
-# Teste de desinstalação
+# Uninstallation test
 bash ~/.dns_changer/uninstall.sh
 ```
 
 ---
 
-## Documentação
+## Documentation
 
-- Mantenha o README.md atualizado
-- Adicione exemplos de uso para novas features
-- Documente mudanças em CHANGELOG.md
-- Use comentários claros no código
-
----
-
-## Versionamento
-
-Este projeto segue [Semantic Versioning](https://semver.org/):
-
-- **MAJOR**: Mudanças incompatíveis
-- **MINOR**: Novas funcionalidades compatíveis
-- **PATCH**: Correções de bugs
+- Keep README.md updated
+- Add usage examples for new features
+- Document changes in CHANGELOG.md
+- Use clear comments in the code
 
 ---
 
-## Licença
+## Versioning
 
-Ao contribuir para este projeto, você concorda que suas contribuições serão licenciadas sob a GPL-3.0.
+This project follows [Semantic Versioning](https://semver.org/):
 
----
-
-## Dúvidas?
-
-Sinta-se livre para abrir uma issue com a tag `question`.
+- **MAJOR**: Incompatible changes
+- **MINOR**: New compatible features
+- **PATCH**: Bug fixes
 
 ---
 
-**Obrigado por contribuir! 🎉**
+## License
+
+By contributing to this project, you agree that your contributions will be licensed under the GPL-3.0.
+
+---
+
+## Questions?
+
+Feel free to open an issue with the `question` tag.
+
+---
+
+**Thank you for contributing! 🎉**
