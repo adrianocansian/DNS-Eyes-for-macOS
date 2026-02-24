@@ -1,4 +1,4 @@
-# DNS Changer Eye - macOS Sequoia Edition
+# DNS Changer Eye - macOS Edition
 
 A fully automated and comprehensive solution for continuous DNS server rotation on macOS Sequoia.
 Designed with a strong emphasis on privacy, security, and user convenience.
