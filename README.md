@@ -3,7 +3,8 @@
 A fully automated and comprehensive solution for continuous DNS server rotation on macOS Sequoia.
 Designed with a strong emphasis on privacy, security, and user convenience.
 
-This project builds upon and extends the core concepts introduced in **DNS Changer Eye** by [BullsEye0](https://github.com/BullsEye0/DNS_Changer_Eye), enhancing reliability, automation, and macOS integration.
+This project is conceptually inspired by  **DNS Changer Eye** by [BullsEye0](https://github.com/BullsEye0/DNS_Changer_Eye), (original Linux implementation by BullsEye0) and reimplemented
+for native macOS integration.
 
 The full article explaining the importance of DNS in ethical hacking can be found at [HackingPassion.com](https://hackingpassion.com/why-your-dns-settings-could-make-or-break-your-hacking-career/).
 
@@ -14,6 +15,11 @@ This project is conceptually inspired by DNS Changer Eye
 originally developed for Linux by BullsEye0.
 
 This repository adapts the concept for native macOS integration.
+
+## Project Status
+
+⚠️ **Experimental research project.***
+Use at your own risk. Feedback and audits are welcome.
 
 ## 📋 Table of Contents
 
@@ -34,7 +40,7 @@ This repository adapts the concept for native macOS integration.
 ### Main Features
 
 - **Automatic DNS Rotation**: Switches between 25+ trusted DNS servers every 5 minutes (configurable).
-- **Automatic Execution**: Starts automatically on login via LaunchDaemon.
+- **Automatic Execution**: Starts automatically on login via LaunchAgent.
 - **Intelligent Detection**: Automatically detects the active network interface.
 - **Complete Logging**: Records all changes and errors to a log file.
 - **Simple Interface**: Intuitive command line with multiple options.
