@@ -1,6 +1,11 @@
 # DNS Changer Eye - macOS Sequoia Edition
 
-A complete and automated solution for continuous DNS server rotation on macOS Sequoia, focusing on privacy, security, and ease of use.
+A fully automated and comprehensive solution for continuous DNS server rotation on macOS Sequoia.
+Designed with a strong emphasis on privacy, security, and user convenience.
+
+This project builds upon and extends the core concepts introduced in DNS Changer Eye by BullsEye0 (https://github.com/BullsEye0/DNS_Changer_Eye), enhancing reliability, automation, and macOS integration.
+
+The full article explaining the importance of DNS in ethical hacking can be found at HackingPassion.com.
 
 ## 📋 Table of Contents
 
