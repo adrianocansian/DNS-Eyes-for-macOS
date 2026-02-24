@@ -18,8 +18,9 @@ This repository adapts the concept for native macOS integration.
 
 ## Project Status
 
-⚠️ **Experimental research project.***
-Use at your own risk. Feedback and audits are welcome.
+⚠️ **Experimental research project.**
+
+Use at your own risk! Feedback and audits are welcome.
 
 ## 📋 Table of Contents
 
