@@ -10,8 +10,7 @@ The full article explaining the importance of DNS in ethical hacking can be foun
 
 ## Origin and Credits
 
-This project is conceptually inspired by DNS Changer Eye
-(https://github.com/BullsEye0/DNS_Changer_Eye),
+This project is conceptually inspired by DNS Changer Eye (https://github.com/BullsEye0/DNS_Changer_Eye),
 originally developed for Linux by BullsEye0.
 
 This repository adapts the concept for native macOS integration.
@@ -357,7 +356,7 @@ sudo networksetup -setdnsservers Wi-Fi Empty
    ls -la ~/.dns_changer/
    ```
 
-4. **LaunchDaemon**: Runs with user privileges (not root), increasing security.
+4. **LaunchAgent** (user-level): Runs with user privileges (not root), increasing security.
 
 5. **Open Source**: All code is transparent and can be audited.
 
