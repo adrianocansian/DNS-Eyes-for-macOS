@@ -1,25 +1,27 @@
 # DNS Changer Eye - macOS Edition
 
-A fully automated and comprehensive solution for continuous DNS server rotation on macOS Sequoia.
+A fully automated and comprehensive solution for continuous DNS server rotation on macOS.
 Designed with a strong emphasis on privacy, security, and user convenience.
-
-This project is conceptually inspired by  **DNS Changer Eye** by [BullsEye0](https://github.com/BullsEye0/DNS_Changer_Eye), (original Linux implementation by BullsEye0) and reimplemented
-for native macOS integration.
-
-The full article explaining the importance of DNS in ethical hacking can be found at [HackingPassion.com](https://hackingpassion.com/why-your-dns-settings-could-make-or-break-your-hacking-career/).
-
-## Origin and Credits
-
-This project is conceptually inspired by DNS Changer Eye (https://github.com/BullsEye0/DNS_Changer_Eye),
-originally developed for Linux by BullsEye0.
-
-This repository adapts the concept for native macOS integration.
 
 ## Project Status
 
-⚠️ **Experimental research project.**
+⚠️ This is an experimental research project.
 
-Use at your own risk! Feedback and audits are welcome.
+The software is functional but under active development and should be
+considered a testing and learning tool rather than a production-ready
+solution.
+
+Interfaces, behavior and configuration details may change as the project evolves.
+
+Feedback, audits and contributions are highly welcome. **Use at your own risk!** Feedback and audits are welcome.
+
+
+## Origin and Credits
+
+This project is conceptually inspired by  **DNS Changer Eye** by [BullsEye0](https://github.com/BullsEye0/DNS_Changer_Eye), (original Linux implementation by BullsEye0) and reimplemented
+for native macOS integration. This repository adapts the concept for native macOS integration.
+
+The full article explaining the importance of DNS in ethical hacking can be found at [HackingPassion.com](https://hackingpassion.com/why-your-dns-settings-could-make-or-break-your-hacking-career/).
 
 ## 📋 Table of Contents
 
