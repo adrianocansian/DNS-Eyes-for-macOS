@@ -5,7 +5,7 @@ Designed with a strong emphasis on privacy, security, and user convenience.
 
 This project builds upon and extends the core concepts introduced in DNS Changer Eye by BullsEye0 (https://github.com/BullsEye0/DNS_Changer_Eye), enhancing reliability, automation, and macOS integration.
 
-The full article explaining the importance of DNS in ethical hacking can be found at HackingPassion.com.
+The full article explaining the importance of DNS in ethical hacking can be found at [HackingPassion.com] (https://hackingpassion.com/why-your-dns-settings-could-make-or-break-your-hacking-career/).
 
 ## 📋 Table of Contents
 
