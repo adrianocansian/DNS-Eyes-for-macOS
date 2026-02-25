@@ -164,9 +164,11 @@ create_daemon_plist() {
 </plist>
 EOF
 
-    # Replace placeholders
-    sed -i \'\' "s|__HOME__|$HOME|g" "$DAEMON_PLIST"
-    sed -i \'\' "s|__USER__|$USER|g" "$DAEMON_PLIST"
+    # Configure plist safely using Python (prevents XML/plist injection attacks)
+    if ! python3 configure_plist.py "$DAEMON_PLIST" "$HOME" "$USER"; then
+        print_error "Failed to configure LaunchAgent plist"
+        exit 1
+    fi
 
     chmod 644 "$DAEMON_PLIST"
 
