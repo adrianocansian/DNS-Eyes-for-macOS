@@ -87,15 +87,23 @@ git clone https://github.com/adrianocansian/DNS-Eyes-for-macOS.git
 cd DNS-Eyes-for-macOS
 ```
 
-2. **Run the installer**:
+2. **Verify file integrity** (IMPORTANT - Protects against supply chain attacks):
 ```bash
-chmod +x install.sh
-./install.sh
+chmod +x verify.sh
+bash verify.sh
 ```
 
-3. **Follow the on-screen instructions**. The script will ask for your administrator password.
+This step is **critical for security**. It verifies that the files have not been modified or compromised. Only proceed if all files are verified successfully.
 
-4. **Done!** The DNS Changer will start automatically.
+3. **Run the installer**:
+```bash
+chmod +x install.sh
+sudo bash install.sh
+```
+
+4. **Follow the on-screen instructions**. The script will ask for your administrator password.
+
+5. **Done!** The DNS Changer will start automatically.
 
 ### Method 2: Manual Installation
 
@@ -346,24 +354,36 @@ sudo networksetup -setdnsservers Wi-Fi Empty
 
 ### Security Considerations
 
-1. **Root Privileges**: The script requires `sudo` to change DNS. This is necessary and secure.
+1. **File Integrity Verification (Supply Chain Protection)**: Before installation, always run the verify.sh script to ensure files have not been compromised. This protects against repository compromise, malicious forks, and man-in-the-middle attacks. Never skip this step!
 
-2. **Passwordless Sudoers**: The installation configures `sudo` to run `networksetup` without a password. This is secure because:
+2. **Root Privileges**: The script requires `sudo` to change DNS. This is necessary and secure.
+
+3. **Passwordless Sudoers**: The installation configures `sudo` to run `networksetup` without a password. This is secure because:
    - It's limited only to `networksetup`
    - It requires the user to be already logged in
    - The `/etc/sudoers.d/dns_changer` file has restricted permissions (440)
 
-3. **Logs**: The logs contain information about changed DNS. Check permissions:
+4. **Logs**: The logs contain information about changed DNS. Check permissions:
    ```bash
    ls -la ~/.dns_changer/
    ```
 
-4. **LaunchAgent** (user-level): Runs with user privileges (not root), increasing security.
+5. **LaunchAgent** (user-level): Runs with user privileges (not root), increasing security.
 
-5. **Open Source**: All code is transparent and can be audited.
+6. **Open Source**: All code is transparent and can be audited.
+
+### Supply Chain Security
+
+This project implements multiple layers of protection against supply chain attacks:
+
+- **SHA-256 Hash Verification**: Each release includes a SHA256SUMS file with cryptographic hashes of all critical files.
+- **Automated Verification Script**: The verify.sh script automatically downloads and verifies file hashes from GitHub.
+- **Transparent Code**: All source code is available for inspection and audit.
+- **No External Dependencies**: The project uses only macOS native tools, reducing the attack surface.
 
 ### Best Practices
 
+- Always verify file integrity before installation
 - Keep the script updated
 - Periodically review the DNS servers
 - Regularly monitor the logs
