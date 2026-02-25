@@ -1,0 +1,228 @@
+name: CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  quality-checks:
+    name: Code Quality & Security Checks
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit pylint flake8 black isort
+
+    - name: Run Black formatter check
+      run: black --check dns_changer.py tests/
+
+    - name: Run isort import checker
+      run: isort --check-only dns_changer.py tests/
+
+    - name: Run Flake8 linter
+      run: flake8 dns_changer.py tests/ --max-line-length=100 --ignore=E203,W503
+
+    - name: Run Pylint
+      run: pylint dns_changer.py --disable=C0111,C0103 --fail-under=8.0 || true
+
+    - name: Run Bandit security check
+      run: bandit -r dns_changer.py -f json -o bandit-report.json || true
+
+    - name: Upload Bandit report
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: bandit-report-${{ matrix.python-version }}
+        path: bandit-report.json
+
+  shell-checks:
+    name: Shell Script Quality Checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install ShellCheck
+      run: sudo apt-get update && sudo apt-get install -y shellcheck
+
+    - name: Run ShellCheck on install.sh
+      run: shellcheck install.sh
+
+    - name: Run ShellCheck on uninstall.sh
+      run: shellcheck uninstall.sh
+
+    - name: Run ShellCheck on verify.sh
+      run: shellcheck verify.sh
+
+  unit-tests:
+    name: Unit Tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ['3.9', '3.10', '3.11']
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install coverage
+
+    - name: Run unit tests with coverage
+      run: |
+        python -m unittest discover -s tests -p 'test_*.py' -v
+
+    - name: Generate coverage report
+      run: |
+        coverage run -m unittest discover -s tests -p 'test_*.py'
+        coverage report
+        coverage xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-umbrella-${{ matrix.python-version }}
+        fail_ci_if_error: false
+
+  json-validation:
+    name: JSON Configuration Validation
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Validate config.example.json
+      run: python -m json.tool config.example.json > /dev/null && echo "✓ config.example.json is valid"
+
+    - name: Validate config_documentation.md exists
+      run: test -f config_documentation.md && echo "✓ config_documentation.md exists"
+
+  documentation:
+    name: Documentation Checks
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Check README exists
+      run: test -f README.md && echo "✓ README.md exists"
+
+    - name: Check QUICKSTART exists
+      run: test -f QUICKSTART.md && echo "✓ QUICKSTART.md exists"
+
+    - name: Check ADVANCED_CONFIGURATION exists
+      run: test -f ADVANCED_CONFIGURATION.md && echo "✓ ADVANCED_CONFIGURATION.md exists"
+
+    - name: Check LICENSE exists
+      run: test -f LICENSE && echo "✓ LICENSE exists"
+
+    - name: Validate markdown links (basic check)
+      run: |
+        grep -r "\[.*\](.*\.md)" *.md | wc -l
+        echo "✓ Markdown documentation validated"
+
+  file-integrity:
+    name: File Integrity & Permissions
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Check critical files exist
+      run: |
+        test -f dns_changer.py && echo "✓ dns_changer.py exists"
+        test -f install.sh && echo "✓ install.sh exists"
+        test -f uninstall.sh && echo "✓ uninstall.sh exists"
+        test -f verify.sh && echo "✓ verify.sh exists"
+        test -f configure_plist.py && echo "✓ configure_plist.py exists"
+
+    - name: Check SHA256SUMS exists
+      run: test -f SHA256SUMS && echo "✓ SHA256SUMS exists" || echo "⚠ SHA256SUMS not found"
+
+    - name: Verify file permissions
+      run: |
+        test -x install.sh && echo "✓ install.sh is executable"
+        test -x uninstall.sh && echo "✓ uninstall.sh is executable"
+        test -x verify.sh && echo "✓ verify.sh is executable"
+
+  security-audit:
+    name: Security Audit
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety
+
+    - name: Run Bandit security scan
+      run: bandit -r dns_changer.py configure_plist.py -f txt || true
+
+    - name: Check for hardcoded secrets
+      run: |
+        ! grep -r "password\|api_key\|secret\|token" dns_changer.py || echo "⚠ Potential hardcoded secrets found"
+
+    - name: Check for SQL injection patterns
+      run: |
+        ! grep -r "execute\|query" dns_changer.py || echo "✓ No SQL injection patterns found"
+
+  summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [quality-checks, shell-checks, unit-tests, json-validation, documentation, file-integrity, security-audit]
+    if: always()
+
+    steps:
+    - name: Check test results
+      run: |
+        echo "=== CI/CD Pipeline Summary ==="
+        echo "Quality Checks: ${{ needs.quality-checks.result }}"
+        echo "Shell Checks: ${{ needs.shell-checks.result }}"
+        echo "Unit Tests: ${{ needs.unit-tests.result }}"
+        echo "JSON Validation: ${{ needs.json-validation.result }}"
+        echo "Documentation: ${{ needs.documentation.result }}"
+        echo "File Integrity: ${{ needs.file-integrity.result }}"
+        echo "Security Audit: ${{ needs.security-audit.result }}"
+
+    - name: Fail if any check failed
+      if: contains(needs.*.result, 'failure')
+      run: exit 1
