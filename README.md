@@ -302,15 +302,17 @@ DNS_SERVERS = [
 # Check if it's running
 launchctl list | grep dns-changer
 
-# View logs in real-time
-tail -f ~/.dns_changer/daemon.log
+# View logs in real-time (requires admin/sudo)
+tail -f /var/log/dns_changer/daemon.log
 
 # View error logs
-tail -f ~/.dns_changer/daemon_error.log
+tail -f /var/log/dns_changer/daemon_error.log
 
 # View all logs
 log show --predicate 'process == "dns_changer.py"' --last 1h
 ```
+
+**Privacy Note:** Log files are stored with restricted permissions (640: `-rw-r-----`) to protect your DNS activity from other users on the system. Only root and admin users can read them.
 
 ### Check Current DNS
 
@@ -416,10 +418,13 @@ sudo networksetup -setdnsservers Wi-Fi Empty
    - It requires the user to be already logged in
    - The `/etc/sudoers.d/dns_changer` file has restricted permissions (440)
 
-4. **Logs**: The logs contain information about changed DNS. Check permissions:
+4. **Logs**: Log files are stored with restrictive permissions (750 for directory, 640 for files) to protect your DNS activity from other users. Only root and admin users can read them:
    ```bash
-   ls -la ~/.dns_changer/
+   ls -la /var/log/dns_changer/
    ```
+   Expected permissions:
+   - Directory: `drwxr-x---` (750)
+   - Log files: `-rw-r-----` (640)
 
 5. **LaunchAgent** (user-level): Runs with user privileges (not root), increasing security.
 

@@ -16,6 +16,7 @@ import secrets
 import time
 import subprocess
 import logging
+import logging.handlers
 import signal
 import atexit
 import socket
@@ -45,23 +46,50 @@ MAX_ROTATION_INTERVAL = 86400  # 24 hours - maximum reasonable interval
 # Create log directory if it doesn't exist
 if not LOG_DIR.exists():
     try:
-        LOG_DIR.mkdir(parents=True, exist_ok=True)
+        LOG_DIR.mkdir(parents=True, exist_ok=True, mode=0o750)
+        # Set restrictive permissions on the log directory
+        os.chmod(LOG_DIR, 0o750)
     except PermissionError:
         # Fallback to user home directory if /var/log is not writable
         LOG_DIR = Path.home() / ".dns_changer"
-        LOG_DIR.mkdir(exist_ok=True)
+        LOG_DIR.mkdir(exist_ok=True, mode=0o700)
+        os.chmod(LOG_DIR, 0o700)
         PID_LOCK_FILE = LOG_DIR / "dns_changer.pid"
         LOG_FILE = LOG_DIR / "dns_changer.log"
 
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
-    handlers=[
-        logging.FileHandler(LOG_FILE),
-        logging.StreamHandler(sys.stdout)
-    ]
-)
+# Configure logger with RotatingFileHandler for secure logging
 logger = logging.getLogger(__name__)
+logger.setLevel(logging.INFO)
+
+# Create formatter
+formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+
+# Create rotating file handler with secure permissions
+try:
+    file_handler = logging.handlers.RotatingFileHandler(
+        LOG_FILE,
+        maxBytes=1024 * 1024,
+        backupCount=5,
+        encoding='utf-8'
+    )
+    os.chmod(LOG_FILE, 0o640)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+except PermissionError:
+    file_handler = logging.handlers.RotatingFileHandler(
+        LOG_FILE,
+        maxBytes=1024 * 1024,
+        backupCount=5,
+        encoding='utf-8'
+    )
+    os.chmod(LOG_FILE, 0o600)
+    file_handler.setFormatter(formatter)
+    logger.addHandler(file_handler)
+
+# Also add console handler
+console_handler = logging.StreamHandler(sys.stdout)
+console_handler.setFormatter(formatter)
+logger.addHandler(console_handler)
 
 # ============================================================================
 # DNS SERVERS

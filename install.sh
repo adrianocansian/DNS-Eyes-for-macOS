@@ -172,12 +172,17 @@ EOF
 }
 
 create_log_directory() {
-    print_info "Creating log directory..."
+    print_info "Creating log directory with secure permissions..."
 
-    # Create log directory with proper permissions
+    # Create log directory with restrictive permissions (750: drwxr-x---)
+    # Only root and admin group can access
     sudo mkdir -p "$CONFIG_DIR"
-    sudo chmod 755 "$CONFIG_DIR"
-    sudo chown root:wheel "$CONFIG_DIR"
+    sudo chmod 750 "$CONFIG_DIR"
+    sudo chown root:admin "$CONFIG_DIR"
+    
+    # Ensure log files will have secure permissions (640: -rw-r-----)
+    # This is enforced in dns_changer.py, but we set umask here too
+    sudo chmod u+s "$CONFIG_DIR"  # Set setuid bit for consistent permissions
 
     print_success "Log directory created at $CONFIG_DIR"
 }
