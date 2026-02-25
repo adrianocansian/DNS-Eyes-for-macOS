@@ -12,7 +12,7 @@ Date: 2026
 
 import os
 import sys
-import random
+import secrets
 import time
 import subprocess
 import logging
@@ -137,7 +137,7 @@ class DNSChanger:
         """
         try:
             result = subprocess.run(
-                ["route", "get", "default"],
+                ["/sbin/route", "get", "default"],
                 capture_output=True,
                 text=True,
                 timeout=5
@@ -255,7 +255,7 @@ class DNSChanger:
         Returns:
             True if successful, False otherwise
         """
-        dns1, dns2 = random.choice(DNS_SERVERS)
+        dns1, dns2 = secrets.choice(DNS_SERVERS)
 
         # Avoid repeating the same DNS
         if self.current_dns == (dns1, dns2):

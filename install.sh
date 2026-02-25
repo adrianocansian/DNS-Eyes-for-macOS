@@ -78,7 +78,7 @@ check_requirements() {
         print_error "Python 3 not found"
         exit 1
     fi
-    PYTHON_VERSION=$(python3 --version | awk \'{print $2}\')
+    PYTHON_VERSION=$(python3 --version | awk '{print $2}')
     print_success "Python $PYTHON_VERSION found"
 
     # Check networksetup
@@ -125,7 +125,7 @@ copy_script() {
 create_daemon_plist() {
     print_info "Creating LaunchAgent daemon..."
 
-    cat > "$DAEMON_PLIST" << \'EOF\'
+    cat > "$DAEMON_PLIST" << 'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
@@ -303,5 +303,4 @@ main() {
 }
 
 # Execute
-main
 main
