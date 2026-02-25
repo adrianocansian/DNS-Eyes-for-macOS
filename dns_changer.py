@@ -18,9 +18,10 @@ import subprocess
 import logging
 import signal
 import atexit
+import socket
 from pathlib import Path
-from datetime import datetime
-from typing import List, Tuple, Optional
+from datetime import datetime, timedelta
+from typing import List, Tuple, Optional, Set
 
 # ============================================================================
 # LOGGING CONFIGURATION
@@ -29,6 +30,15 @@ from typing import List, Tuple, Optional
 LOG_DIR = Path("/var/log/dns_changer")
 LOG_FILE = LOG_DIR / "dns_changer.log"
 PID_LOCK_FILE = Path("/var/run/dns_changer.pid")
+
+# ============================================================================
+# DNS VALIDATION CONFIGURATION
+# ============================================================================
+
+DNS_HEALTH_CHECK_TIMEOUT = 2
+DNS_HEALTH_CHECK_DOMAIN = "google.com"
+HEALTHY_SERVERS_CACHE_TTL = 1800
+MIN_HEALTHY_SERVERS = 3
 
 # Create log directory if it doesn't exist
 if not LOG_DIR.exists():
@@ -107,6 +117,126 @@ DNS_SERVERS = [
     # Google
     ("8.8.8.8", "8.8.4.4"),
 ]
+
+# ============================================================================
+# DNS HEALTH CHECK FUNCTIONS
+# ============================================================================
+
+class DNSHealthChecker:
+    """Manages DNS server health checks and caching"""
+
+    def __init__(self):
+        """Initialize the health checker with empty cache"""
+        self.healthy_servers: Set[Tuple[str, str]] = set()
+        self.last_cache_update = None
+        self.lock = False
+
+    def is_dns_responsive(self, dns_ip: str, timeout: int = DNS_HEALTH_CHECK_TIMEOUT) -> bool:
+        """
+        Checks if a DNS server is responsive by performing a DNS query.
+
+        Args:
+            dns_ip: IP address of the DNS server to check
+            timeout: Timeout in seconds for the DNS query
+
+        Returns:
+            True if DNS server is responsive, False otherwise
+        """
+        try:
+            # Create a socket for DNS query
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.settimeout(timeout)
+
+            # Construct a simple DNS query for google.com (A record)
+            # This is a minimal DNS query packet
+            dns_query = b'\x00\x01\x01\x00\x00\x01\x00\x00\x00\x00\x00\x00'
+            dns_query += b'\x06google\x03com\x00\x00\x01\x00\x01'
+
+            # Send query to DNS server
+            sock.sendto(dns_query, (dns_ip, 53))
+
+            # Try to receive response
+            response, _ = sock.recvfrom(512)
+            sock.close()
+
+            # If we got a response, the server is responsive
+            return len(response) > 0
+
+        except (socket.timeout, socket.error, OSError) as e:
+            logger.debug(f"DNS health check failed for {dns_ip}: {e}")
+            return False
+
+    def validate_dns_servers(self, dns_servers: List[Tuple[str, str]]) -> Set[Tuple[str, str]]:
+        """
+        Validates a list of DNS servers and returns only the healthy ones.
+
+        Args:
+            dns_servers: List of DNS server pairs to validate
+
+        Returns:
+            Set of healthy DNS server pairs
+        """
+        healthy = set()
+
+        logger.info(f"Starting health check for {len(dns_servers)} DNS servers...")
+
+        for dns1, dns2 in dns_servers:
+            # Check if at least one server in the pair is responsive
+            dns1_ok = self.is_dns_responsive(dns1)
+            dns2_ok = self.is_dns_responsive(dns2)
+
+            if dns1_ok or dns2_ok:
+                healthy.add((dns1, dns2))
+                status = "✓ HEALTHY" if (dns1_ok and dns2_ok) else "⚠ PARTIAL"
+                logger.debug(f"{status}: {dns1}, {dns2}")
+            else:
+                logger.debug(f"✗ FAILED: {dns1}, {dns2}")
+
+        logger.info(f"Health check complete: {len(healthy)}/{len(dns_servers)} servers are healthy")
+        return healthy
+
+    def get_healthy_servers(self, dns_servers: List[Tuple[str, str]], force_refresh: bool = False) -> Set[Tuple[str, str]]:
+        """
+        Gets the list of healthy DNS servers, using cache when available.
+
+        Args:
+            dns_servers: Full list of DNS servers
+            force_refresh: Force re-validation even if cache is fresh
+
+        Returns:
+            Set of healthy DNS server pairs
+        """
+        now = datetime.now()
+
+        # Check if cache needs update
+        if force_refresh or self.last_cache_update is None or (now - self.last_cache_update).total_seconds() > HEALTHY_SERVERS_CACHE_TTL:
+            logger.info("Updating DNS health check cache...")
+            self.healthy_servers = self.validate_dns_servers(dns_servers)
+            self.last_cache_update = now
+
+        return self.healthy_servers
+
+    def get_random_healthy_server(self, dns_servers: List[Tuple[str, str]]) -> Optional[Tuple[str, str]]:
+        """
+        Gets a random healthy DNS server, with fallback logic.
+
+        Args:
+            dns_servers: Full list of DNS servers
+
+        Returns:
+            A healthy DNS server pair, or None if no healthy servers available
+        """
+        healthy = self.get_healthy_servers(dns_servers)
+
+        if not healthy:
+            logger.warning("No healthy DNS servers in cache, forcing re-validation...")
+            healthy = self.get_healthy_servers(dns_servers, force_refresh=True)
+
+        if not healthy:
+            logger.error("No healthy DNS servers found! Using fallback (Cloudflare)...")
+            return ("1.1.1.1", "1.0.0.1")
+
+        return secrets.choice(list(healthy))
 
 # ============================================================================
 # PID LOCK MANAGEMENT
@@ -200,6 +330,7 @@ class DNSChanger:
         self.interface = interface or self._detect_interface()
         self.running = False
         self.current_dns = None
+        self.health_checker = DNSHealthChecker()
 
         # Register signal handlers for graceful shutdown
         signal.signal(signal.SIGTERM, self._signal_handler)
@@ -336,12 +467,16 @@ class DNSChanger:
 
     def rotate_dns(self) -> bool:
         """
-        Rotates to a new random DNS server
+        Rotates to a new random healthy DNS server
 
         Returns:
             True if successful, False otherwise
         """
-        dns1, dns2 = secrets.choice(DNS_SERVERS)
+        dns_pair = self.health_checker.get_random_healthy_server(DNS_SERVERS)
+        if dns_pair is None:
+            logger.error("No DNS servers available")
+            return False
+        dns1, dns2 = dns_pair
 
         # Avoid repeating the same DNS
         if self.current_dns == (dns1, dns2):
