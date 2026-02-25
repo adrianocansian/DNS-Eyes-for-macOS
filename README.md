@@ -215,16 +215,51 @@ launchctl unload ~/Library/LaunchAgents/com.dns-changer.daemon.plist
 launchctl load ~/Library/LaunchAgents/com.dns-changer.daemon.plist
 ```
 
-### Specify Network Interface
+### Network Interface Detection
 
-If you have multiple interfaces (Wi-Fi, Ethernet, VPN), you can specify which one to use:
+The DNS Changer automatically detects your active network interface using a multi-strategy approach:
+
+**Detection Strategy:**
+1. Checks macOS network service preferences (respects your interface priority)
+2. Identifies all active interfaces
+3. Uses the highest-priority active interface
+4. Falls back to default route detection if needed
+5. Defaults to Wi-Fi if all else fails
+
+**Multiple Active Interfaces:**
+
+If you have multiple interfaces active (Wi-Fi + Ethernet), the script will:
+- Log a warning showing which interfaces are active
+- Use the highest-priority interface according to your macOS settings
+- Continue without interruption
+
+**Specify a Different Interface:**
+
+If auto-detection chooses the wrong interface, specify it manually:
 
 ```bash
-# List available interfaces
+# List all available network services
 networksetup -listallnetworkservices
 
-# Use a specific interface
+# Run with a specific interface
 dns_changer.py --interface Ethernet
+```
+
+**VPN Considerations:**
+
+If you use a VPN, the VPN interface becomes the active route and DNS Changer will automatically detect and use it. DNS rotation will apply through the VPN tunnel.
+
+**Troubleshooting:**
+
+```bash
+# Check which interface was detected
+tail -f /var/log/dns_changer/daemon.log | grep interface
+
+# Check all active network services
+networksetup -listallnetworkservices
+
+# View current DNS for a specific interface
+networksetup -getdnsservers Wi-Fi
 ```
 
 ### Add Custom DNS Servers

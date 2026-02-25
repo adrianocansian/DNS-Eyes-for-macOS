@@ -345,13 +345,38 @@ class DNSChanger:
         release_lock()
         sys.exit(0)
 
-    def _detect_interface(self) -> str:
-        """
-        Automatically detects the active network interface
+    def _get_network_service_order(self) -> List[str]:
+        """Gets network service order from macOS preferences."""
+        try:
+            result = subprocess.run(
+                ["/usr/sbin/networksetup", "-listallnetworkservices"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            services = [line.strip() for line in result.stdout.strip().split('\n') 
+                       if line.strip() and not line.startswith('*')]
+            return services
+        except Exception as e:
+            logger.debug(f"Error getting network service order: {e}")
+            return []
 
-        Returns:
-            Interface name (e.g., 'Wi-Fi', 'Ethernet')
-        """
+    def _is_interface_active(self, interface: str) -> bool:
+        """Checks if a network interface is active."""
+        try:
+            result = subprocess.run(
+                ["/usr/sbin/networksetup", "-getnetworkserviceenabled", interface],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            return "Enabled" in result.stdout
+        except Exception as e:
+            logger.debug(f"Error checking interface {interface}: {e}")
+            return False
+
+    def _detect_interface_by_route(self) -> Optional[str]:
+        """Detects interface using default route (fallback method)."""
         try:
             result = subprocess.run(
                 ["/sbin/route", "get", "default"],
@@ -359,16 +384,39 @@ class DNSChanger:
                 text=True,
                 timeout=5
             )
-
             for line in result.stdout.split('\n'):
                 if 'interface:' in line:
-                    interface = line.split(':')[1].strip()
-                    logger.info(f"Detected interface: {interface}")
-                    return interface
+                    return line.split(':')[1].strip()
         except Exception as e:
-            logger.warning(f"Error detecting interface: {e}")
+            logger.debug(f"Error detecting interface via route: {e}")
+        return None
 
-        logger.warning("Using default interface: Wi-Fi")
+    def _detect_interface(self) -> str:
+        """Detects active network interface using multiple strategies."""
+        logger.info("Starting network interface detection...")
+        
+        services = self._get_network_service_order()
+        active_services = [s for s in services if self._is_interface_active(s)]
+        
+        if active_services:
+            if len(active_services) > 1:
+                logger.warning(
+                    f"Multiple active interfaces: {', '.join(active_services)}. "
+                    f"Using '{active_services[0]}'. To use different: --interface <name>"
+                )
+            else:
+                logger.info(f"Detected interface: {active_services[0]}")
+            return active_services[0]
+        
+        route_interface = self._detect_interface_by_route()
+        if route_interface:
+            logger.info(f"Detected interface via route: {route_interface}")
+            return route_interface
+        
+        logger.warning(
+            "Could not auto-detect interface. Defaulting to Wi-Fi. "
+            "Use --interface <name> if incorrect."
+        )
         return "Wi-Fi"
 
     def _validate_dns(self, dns1: str, dns2: str) -> bool:
