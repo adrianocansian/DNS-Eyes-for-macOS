@@ -39,6 +39,8 @@ DNS_HEALTH_CHECK_TIMEOUT = 2
 DNS_HEALTH_CHECK_DOMAIN = "google.com"
 HEALTHY_SERVERS_CACHE_TTL = 1800
 MIN_HEALTHY_SERVERS = 3
+MIN_ROTATION_INTERVAL = 180  # 3 minutes - minimum to avoid network instability
+MAX_ROTATION_INTERVAL = 86400  # 24 hours - maximum reasonable interval
 
 # Create log directory if it doesn't exist
 if not LOG_DIR.exists():
@@ -326,7 +328,23 @@ class DNSChanger:
             interval: Interval in seconds for DNS rotation (default: 300 = 5 min)
             interface: Specific network interface (Wi-Fi, Ethernet, etc.)
         """
-        self.interval = interval
+        # Validate and enforce minimum rotation interval
+        if interval < MIN_ROTATION_INTERVAL:
+            logger.warning(
+                f"Rotation interval {interval}s is too short. "
+                f"Using minimum {MIN_ROTATION_INTERVAL}s."
+            )
+            self.interval = MIN_ROTATION_INTERVAL
+        elif interval > MAX_ROTATION_INTERVAL:
+            logger.warning(
+                f"Rotation interval {interval}s exceeds maximum. "
+                f"Using maximum {MAX_ROTATION_INTERVAL}s."
+            )
+            self.interval = MAX_ROTATION_INTERVAL
+        else:
+            self.interval = interval
+            logger.info(f"Rotation interval set to {self.interval}s")
+
         self.interface = interface or self._detect_interface()
         self.running = False
         self.current_dns = None

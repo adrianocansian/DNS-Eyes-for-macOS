@@ -205,9 +205,13 @@ Look for:
 ```
 
 Change `300` to the desired interval in seconds:
+- `180` = 3 minutes (minimum)
 - `300` = 5 minutes (default)
 - `600` = 10 minutes
 - `1800` = 30 minutes
+- `3600` = 1 hour
+
+**Minimum Interval:** The script enforces a minimum of 180 seconds (3 minutes). Shorter intervals can cause network instability, DNS failures, and broken connections. If you specify less than 180 seconds, the script will automatically use 180 seconds and log a warning.
 
 Then reload:
 ```bash
