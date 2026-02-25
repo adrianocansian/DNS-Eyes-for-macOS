@@ -3,9 +3,9 @@
 A fully automated and comprehensive solution for continuous DNS server rotation on macOS.
 Designed with a strong emphasis on privacy, security, and user convenience.
 
-**Adriano Cansian / ACME! Cybersecurity Research ** 
+**Adriano Cansian / ACME! Cybersecurity Research** 
 
-UNESP - Sao Paulo State University - Brazil (adriano.cansian@unesp.br)
+__UNESP - Sao Paulo State University__ - Brazil (adriano.cansian@unesp.br)
 
 (Project Security Audit Commit is AI Assisted by Manus.im)
 
