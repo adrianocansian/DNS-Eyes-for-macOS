@@ -19,8 +19,8 @@ NC='\033[0m' # No Color
 
 # Settings
 INSTALL_DIR="/usr/local/bin"
-CONFIG_DIR="$HOME/.dns_changer"
-DAEMON_DIR="$HOME/Library/LaunchAgents"
+CONFIG_DIR="/var/log/dns_changer"
+DAEMON_DIR="/Library/LaunchDaemons"
 DAEMON_NAME="com.dns-changer.daemon"
 DAEMON_PLIST="$DAEMON_DIR/$DAEMON_NAME.plist"
 SCRIPT_NAME="dns_changer.py"
@@ -123,7 +123,7 @@ copy_script() {
 }
 
 create_daemon_plist() {
-    print_info "Creating LaunchAgent daemon..."
+    print_info "Creating LaunchDaemon (runs as root, no sudoers needed)..."
 
     cat > "$DAEMON_PLIST" << 'EOF'
 <?xml version="1.0" encoding="UTF-8"?>
@@ -147,10 +147,10 @@ create_daemon_plist() {
     <true/>
 
     <key>StandardOutPath</key>
-    <string>__HOME__/.dns_changer/daemon.log</string>
+    <string>/var/log/dns_changer/daemon.log</string>
 
     <key>StandardErrorPath</key>
-    <string>__HOME__/.dns_changer/daemon_error.log</string>
+    <string>/var/log/dns_changer/daemon_error.log</string>
 
     <key>EnvironmentVariables</key>
     <dict>
@@ -158,46 +158,28 @@ create_daemon_plist() {
         <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
     </dict>
 
-    <key>UserName</key>
-    <string>__USER__</string>
 </dict>
 </plist>
 EOF
 
-    # Configure plist safely using Python (prevents XML/plist injection attacks)
-    if ! python3 configure_plist.py "$DAEMON_PLIST" "$HOME" "$USER"; then
-        print_error "Failed to configure LaunchAgent plist"
-        exit 1
-    fi
+    # Copy to LaunchDaemons directory with proper ownership
+    sudo cp "$DAEMON_PLIST" "$DAEMON_PLIST.tmp"
+    sudo mv "$DAEMON_PLIST.tmp" "$DAEMON_PLIST"
+    sudo chown root:wheel "$DAEMON_PLIST"
+    sudo chmod 644 "$DAEMON_PLIST"
 
-    chmod 644 "$DAEMON_PLIST"
-
-    print_success "LaunchAgent created at $DAEMON_PLIST"
+    print_success "LaunchDaemon created at $DAEMON_PLIST (runs as root)"
 }
 
-setup_sudoers() {
-    print_info "Configuring sudoers for passwordless execution..."
+create_log_directory() {
+    print_info "Creating log directory..."
 
-    # Create temporary file
-    TEMP_SUDOERS=$(mktemp)
+    # Create log directory with proper permissions
+    sudo mkdir -p "$CONFIG_DIR"
+    sudo chmod 755 "$CONFIG_DIR"
+    sudo chown root:wheel "$CONFIG_DIR"
 
-    # Add entry for networksetup
-    echo "$USER ALL=(ALL) NOPASSWD: /usr/sbin/networksetup" >> "$TEMP_SUDOERS"
-
-    # Check syntax
-    if ! sudo visudo -c -f "$TEMP_SUDOERS" 2>/dev/null; then
-        print_error "Error in sudoers configuration"
-        rm "$TEMP_SUDOERS"
-        return 1
-    fi
-
-    # Apply configuration
-    sudo bash -c "cat $TEMP_SUDOERS >> /etc/sudoers.d/dns_changer"
-    sudo chmod 440 /etc/sudoers.d/dns_changer
-
-    rm "$TEMP_SUDOERS"
-
-    print_success "Sudoers configured"
+    print_success "Log directory created at $CONFIG_DIR"
 }
 
 load_daemon() {
@@ -253,7 +235,7 @@ print_summary() {
     echo "Installation Information:"
     echo "  Main Script: $SCRIPT_PATH"
     echo "  Config Directory: $CONFIG_DIR"
-    echo "  LaunchAgent: $DAEMON_PLIST"
+    echo "  LaunchDaemon: $DAEMON_PLIST"
     echo ""
     echo "Useful Commands:"
     echo "  • Check status: launchctl list | grep dns-changer"
@@ -262,7 +244,8 @@ print_summary() {
     echo "  • Start daemon: launchctl load $DAEMON_PLIST"
     echo "  • Uninstall: bash $CONFIG_DIR/uninstall.sh"
     echo ""
-    echo "The DNS Changer will start automatically the next time you log in"
+    echo "The DNS Changer will start automatically at system boot"
+    echo "No sudoers configuration needed - runs as root via LaunchDaemon"
     echo ""
 }
 
@@ -292,7 +275,7 @@ main() {
     create_daemon_plist
     echo ""
 
-    setup_sudoers
+    create_log_directory
     echo ""
 
     load_daemon

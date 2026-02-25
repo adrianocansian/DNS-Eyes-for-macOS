@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.dns-changer.daemon</string>
+
+    <key>ProgramArguments</key>
+    <array>
+        <string>/usr/local/bin/dns_changer.py</string>
+        <string>--interval</string>
+        <string>300</string>
+    </array>
+
+    <key>RunAtLoad</key>
+    <true/>
+
+    <key>KeepAlive</key>
+    <true/>
+
+    <key>StandardOutPath</key>
+    <string>/var/log/dns_changer/daemon.log</string>
+
+    <key>StandardErrorPath</key>
+    <string>/var/log/dns_changer/daemon_error.log</string>
+
+    <key>EnvironmentVariables</key>
+    <dict>
+        <key>PATH</key>
+        <string>/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin</string>
+    </dict>
+
+    <!-- LaunchDaemon runs as root by default, no UserName key needed -->
+    <!-- This eliminates the need for sudoers configuration -->
+</dict>
+</plist>
