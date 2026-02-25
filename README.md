@@ -1,11 +1,11 @@
 # DNS Changer Eye - macOS Edition
 
-**ADRIANO CANSIAN** (adriano.cansian@unesp.br)
-(Project Security Audit Commit is AI Assisted by Manus.im)
-
-
 A fully automated and comprehensive solution for continuous DNS server rotation on macOS.
 Designed with a strong emphasis on privacy, security, and user convenience.
+
+**ADRIANO CANSIAN** (adriano.cansian@unesp.br)
+
+(Project Security Audit Commit is AI Assisted by Manus.im)
 
 ## Project Status
 
