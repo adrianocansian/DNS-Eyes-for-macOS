@@ -41,12 +41,12 @@ The full article explaining the importance of DNS in ethical hacking can be foun
 ### Main Features
 
 - **Automatic DNS Rotation**: Switches between 25+ trusted DNS servers every 5 minutes (configurable).
-- **Automatic Execution**: Starts automatically on login via LaunchAgent.
-- **Intelligent Detection**: Automatically detects the active network interface.
-- **Complete Logging**: Records all changes and errors to a log file.
+- **System-Level Execution**: Runs as root via LaunchDaemon for secure, automatic operation.
+- **Intelligent Detection**: Automatically detects the active network interface with multi-strategy fallback.
+- **Complete Logging**: Records all changes and errors to `/var/log/dns_changer/` with secure permissions.
 - **Simple Interface**: Intuitive command line with multiple options.
-- **Security**: Automatic sudoers configuration for passwordless execution.
-- **Reversible**: Easy uninstallation with automatic DNS reset.
+- **Enterprise Security**: No sudoers configuration needed; runs with proper privilege separation.
+- **Reversible**: Easy uninstallation with automatic DNS reset to DHCP.
 
 ### Supported DNS Servers
 
@@ -214,8 +214,8 @@ Change `300` to the desired interval in seconds:
 
 Then reload:
 ```bash
-launchctl unload ~/Library/LaunchAgents/com.dns-changer.daemon.plist
-launchctl load ~/Library/LaunchAgents/com.dns-changer.daemon.plist
+sudo launchctl bootout system /Library/LaunchDaemons/com.dns-changer.daemon.plist
+sudo launchctl bootstrap system /Library/LaunchDaemons/com.dns-changer.daemon.plist
 ```
 
 ### Advanced Configuration
@@ -374,18 +374,11 @@ chmod +x /usr/local/bin/dns_changer.py
 **Check**:
 ```bash
 # Check if it's loaded
-launchctl list | grep dns-changer
+sudo launchctl list | grep dns-changer
 
 # Reload
-launchctl unload ~/Library/LaunchAgents/com.dns-changer.daemon.plist
-launchctl load ~/Library/LaunchAgents/com.dns-changer.daemon.plist
-```
-
-### Problem: "sudo: networksetup: command not found"
-
-**Solution**: Reconfigure sudoers:
-```bash
-echo "$USER ALL=(ALL) NOPASSWD: /usr/sbin/networksetup" | sudo tee /etc/sudoers.d/dns_changer
+sudo launchctl bootout system /Library/LaunchDaemons/com.dns-changer.daemon.plist
+sudo launchctl bootstrap system /Library/LaunchDaemons/com.dns-changer.daemon.plist
 ```
 
 ### Problem: DNS does not change
@@ -393,7 +386,7 @@ echo "$USER ALL=(ALL) NOPASSWD: /usr/sbin/networksetup" | sudo tee /etc/sudoers.
 **Check**:
 1. Correct interface: `dns_changer.py --get`
 2. Privileges: `sudo -l | grep networksetup`
-3. Logs: `tail -f ~/.dns_changer/daemon.log`
+3. Logs: `tail -f /var/log/dns_changer/daemon.log`
 
 ### Problem: VPN overrides DNS
 
@@ -416,22 +409,21 @@ bash /var/log/dns_changer/uninstall.sh
 
 ```bash
 # 1. Unload the daemon
-launchctl unload ~/Library/LaunchAgents/com.dns-changer.daemon.plist
+sudo launchctl bootout system /Library/LaunchDaemons/com.dns-changer.daemon.plist
 
-# 2. Remove the script
+# 2. Remove the daemon plist
+sudo rm /Library/LaunchDaemons/com.dns-changer.daemon.plist
+
+# 3. Remove the script
 sudo rm /usr/local/bin/dns_changer.py
 
-# 3. Remove sudoers configuration
-sudo rm /etc/sudoers.d/dns_changer
+# 4. Remove the log directory
+sudo rm -rf /var/log/dns_changer
 
-# 4. Remove the daemon file
-rm ~/Library/LaunchAgents/com.dns-changer.daemon.plist
-
-# 5. Remove the configuration directory
-rm -rf ~/.dns_changer
-
-# 6. Reset DNS (optional)
-sudo networksetup -setdnsservers Wi-Fi Empty
+# 5. Reset DNS to DHCP (optional)
+# For each network service:
+sudo networksetup -setdnsservers "Wi-Fi" Empty
+sudo networksetup -setdnsservers "Ethernet" Empty
 ```
 
 ---
@@ -444,10 +436,11 @@ sudo networksetup -setdnsservers Wi-Fi Empty
 
 2. **Root Privileges**: The script requires `sudo` to change DNS. This is necessary and secure.
 
-3. **Passwordless Sudoers**: The installation configures `sudo` to run `networksetup` without a password. This is secure because:
-   - It's limited only to `networksetup`
-   - It requires the user to be already logged in
-   - The `/etc/sudoers.d/dns_changer` file has restricted permissions (440)
+3. **LaunchDaemon (System-Level)**: The script runs as a LaunchDaemon with root privileges, eliminating the need for sudoers configuration. This is more secure because:
+   - No passwordless sudo rules needed
+   - Runs with proper privilege separation
+   - Automatic startup and restart on failure
+   - Isolated from user session
 
 4. **Logs**: Log files are stored with restrictive permissions (750 for directory, 640 for files) to protect your DNS activity from other users. Only root and admin users can read them:
    ```bash
@@ -457,7 +450,7 @@ sudo networksetup -setdnsservers Wi-Fi Empty
    - Directory: `drwxr-x---` (750)
    - Log files: `-rw-r-----` (640)
 
-5. **LaunchAgent** (user-level): Runs with user privileges (not root), increasing security.
+5. **Log Rotation**: Log files are automatically rotated to prevent unbounded growth and maintain system performance.
 
 6. **Open Source**: All code is transparent and can be audited.
 
@@ -465,10 +458,10 @@ sudo networksetup -setdnsservers Wi-Fi Empty
 
 This project implements multiple layers of protection against supply chain attacks:
 
-- **SHA-256 Hash Verification**: Each release includes a SHA256SUMS file with cryptographic hashes of all critical files.
-- **Automated Verification Script**: The verify.sh script automatically downloads and verifies file hashes from GitHub.
+- **SHA-256 Hash Verification**: File integrity is verified before installation to detect tampering, repository compromise, or man-in-the-middle attacks.
 - **Transparent Code**: All source code is available for inspection and audit.
 - **No External Dependencies**: The project uses only macOS native tools, reducing the attack surface.
+- **Secure Installation**: Uses temporary files and atomic operations to prevent partial or corrupted installations.
 
 ### Best Practices
 
@@ -535,7 +528,7 @@ Contributions are welcome! Please:
 If you encounter problems:
 
 1. Check the [Troubleshooting](#troubleshooting) section
-2. Check the logs: `tail -f ~/.dns_changer/daemon.log`
+2. Check the logs: `tail -f /var/log/dns_changer/daemon.log`
 3. Open an issue on GitHub
 
 ---
