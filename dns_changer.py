@@ -17,6 +17,7 @@ import time
 import subprocess
 import logging
 import signal
+import atexit
 from pathlib import Path
 from datetime import datetime
 from typing import List, Tuple, Optional
@@ -25,9 +26,20 @@ from typing import List, Tuple, Optional
 # LOGGING CONFIGURATION
 # ============================================================================
 
-LOG_DIR = Path.home() / ".dns_changer"
-LOG_DIR.mkdir(exist_ok=True)
+LOG_DIR = Path("/var/log/dns_changer")
 LOG_FILE = LOG_DIR / "dns_changer.log"
+PID_LOCK_FILE = Path("/var/run/dns_changer.pid")
+
+# Create log directory if it doesn't exist
+if not LOG_DIR.exists():
+    try:
+        LOG_DIR.mkdir(parents=True, exist_ok=True)
+    except PermissionError:
+        # Fallback to user home directory if /var/log is not writable
+        LOG_DIR = Path.home() / ".dns_changer"
+        LOG_DIR.mkdir(exist_ok=True)
+        PID_LOCK_FILE = LOG_DIR / "dns_changer.pid"
+        LOG_FILE = LOG_DIR / "dns_changer.log"
 
 logging.basicConfig(
     level=logging.INFO,
@@ -97,6 +109,79 @@ DNS_SERVERS = [
 ]
 
 # ============================================================================
+# PID LOCK MANAGEMENT
+# ============================================================================
+
+def is_process_running(pid: int) -> bool:
+    """
+    Checks if a process with the given PID is still running.
+
+    Args:
+        pid: Process ID to check
+
+    Returns:
+        True if process is running, False otherwise
+    """
+    try:
+        os.kill(pid, 0)  # Signal 0 doesn't kill, just checks if process exists
+        return True
+    except (ProcessLookupError, OSError):
+        return False
+
+def acquire_lock() -> bool:
+    """
+    Attempts to acquire the PID lock file.
+    If another instance is running, returns False.
+    If an orphaned lock exists, removes it and acquires the lock.
+
+    Returns:
+        True if lock was acquired, False if another instance is running
+    """
+    if PID_LOCK_FILE.exists():
+        try:
+            with open(PID_LOCK_FILE, 'r') as f:
+                old_pid = int(f.read().strip())
+
+            if is_process_running(old_pid):
+                logger.error(f"Another instance is already running (PID: {old_pid})")
+                return False
+            else:
+                logger.warning(f"Removing orphaned lock file (PID: {old_pid} not running)")
+                PID_LOCK_FILE.unlink()
+        except (ValueError, IOError) as e:
+            logger.warning(f"Error reading lock file: {e}. Removing it.")
+            try:
+                PID_LOCK_FILE.unlink()
+            except OSError:
+                pass
+
+    # Write current PID to lock file
+    try:
+        with open(PID_LOCK_FILE, 'w') as f:
+            f.write(str(os.getpid()))
+        logger.info(f"Lock acquired (PID: {os.getpid()})")
+        return True
+    except IOError as e:
+        logger.error(f"Failed to create lock file: {e}")
+        return False
+
+def release_lock():
+    """
+    Releases the PID lock file.
+    This function is called automatically on exit.
+    """
+    try:
+        if PID_LOCK_FILE.exists():
+            # Only remove if it's our lock
+            with open(PID_LOCK_FILE, 'r') as f:
+                lock_pid = int(f.read().strip())
+            if lock_pid == os.getpid():
+                PID_LOCK_FILE.unlink()
+                logger.info("Lock released")
+    except (ValueError, IOError, OSError) as e:
+        logger.warning(f"Error releasing lock: {e}")
+
+# ============================================================================
 # MAIN CLASS
 # ============================================================================
 
@@ -126,6 +211,7 @@ class DNSChanger:
         """Handler for shutdown signals"""
         logger.info("Received shutdown signal, shutting down...")
         self.running = False
+        release_lock()
         sys.exit(0)
 
     def _detect_interface(self) -> str:
@@ -368,6 +454,15 @@ def main():
     args = parser.parse_args()
 
     print_banner()
+
+    # Acquire lock to prevent multiple instances
+    if not acquire_lock():
+        print("Error: Another instance of DNS Changer is already running.")
+        print("Please wait for it to finish or stop it manually.")
+        return 1
+
+    # Register cleanup function to be called on exit
+    atexit.register(release_lock)
 
     changer = DNSChanger(interval=args.interval, interface=args.interface)
 
