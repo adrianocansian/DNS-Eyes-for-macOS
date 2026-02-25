@@ -1,5 +1,9 @@
 # DNS Changer Eye - macOS Edition
 
+**ADRIANO CANSIAN** (adriano.cansian@unesp.br)
+(Project Security Audit Commit is AI Assisted by Manus.im)
+
+
 A fully automated and comprehensive solution for continuous DNS server rotation on macOS.
 Designed with a strong emphasis on privacy, security, and user convenience.
 
@@ -18,6 +22,8 @@ Feedback, audits, and contributions are highly welcome. **Use at your own risk!*
 ## Origin and Credits
 
 This project is a native macOS adaptation of **DNS Changer Eye**, the original Linux implementation by [BullsEye0](https://github.com/BullsEye0/DNS_Changer_Eye). We extend our gratitude to BullsEye0 for the innovative concept and foundational work that inspired this macOS port.
+
+This project Security Audit Commit is AI-Assisted  by Manus.im
 
 The full article explaining the importance of DNS in ethical hacking can be found at [HackingPassion.com](https://hackingpassion.com/why-your-dns-settings-could-make-or-break-your-hacking-career/).
 
