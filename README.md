@@ -83,8 +83,8 @@ The script includes a curated list of 25+ public and trusted DNS servers:
 
 1. **Clone or download the repository**:
 ```bash
-git clone https://github.com/adrianocansian/DNS-Eyes-for-macOS.git
-cd DNS-Eyes-for-macOS
+git clone https://github.com/adrianocansian/macOS-DNS-Eyes.git
+cd macOS-DNS-Eyes
 ```
 
 2. **Verify file integrity** (IMPORTANT - Protects against supply chain attacks):
