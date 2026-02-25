@@ -247,19 +247,33 @@ dns_changer.py --interface Ethernet
 
 **VPN Considerations:**
 
-If you use a VPN, the VPN interface becomes the active route and DNS Changer will automatically detect and use it. DNS rotation will apply through the VPN tunnel.
+When you connect to a VPN, DNS Changer behaves intelligently:
+
+1. **Automatic Detection:** Detects when a VPN is active
+2. **DNS Overwrite Detection:** Monitors if VPN overwrites DNS settings
+3. **Intelligent Pausing:** Pauses rotation to avoid conflicts
+4. **Automatic Resume:** Resumes when VPN disconnects
+
+**Log Messages:**
+
+- `WARNING: VPN detected with DNS overwrite. Pausing rotation.`
+- `INFO: Resuming DNS rotation.`
+- `WARNING: DNS overwrite detected. Pausing rotation.`
 
 **Troubleshooting:**
 
 ```bash
+# Check VPN detection
+tail -f /var/log/dns_changer/daemon.log | grep -i vpn
+
+# Check DNS overwrite detection
+tail -f /var/log/dns_changer/daemon.log | grep -i overwrite
+
 # Check which interface was detected
 tail -f /var/log/dns_changer/daemon.log | grep interface
 
-# Check all active network services
-networksetup -listallnetworkservices
-
-# View current DNS for a specific interface
-networksetup -getdnsservers Wi-Fi
+# Check if VPN interface is active
+ifconfig | grep -E "utun|ppp|tun|tap"
 ```
 
 ### Add Custom DNS Servers

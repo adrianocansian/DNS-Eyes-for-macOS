@@ -467,6 +467,46 @@ class DNSChanger:
         except Exception as e:
             return False, str(e)
 
+    def _is_vpn_active(self) -> bool:
+        """Checks if a VPN interface is currently active."""
+        try:
+            result = subprocess.run(
+                ["ifconfig"],
+                capture_output=True,
+                text=True,
+                timeout=5
+            )
+            # VPN interfaces typically start with utun, ppp, tun, or tap
+            vpn_patterns = ['utun', 'ppp', 'tun', 'tap']
+            for line in result.stdout.split('\n'):
+                for pattern in vpn_patterns:
+                    if line.startswith(pattern):
+                        logger.debug(f"VPN interface detected: {line.split(':')[0]}")
+                        return True
+            return False
+        except Exception as e:
+            logger.debug(f"Error checking VPN status: {e}")
+            return False
+
+    def _dns_was_overwritten(self) -> bool:
+        """Checks if DNS settings were overwritten by another process."""
+        if self.current_dns is None:
+            return False
+        
+        current = self.get_current_dns()
+        if current is None:
+            return True
+        
+        # Check if current DNS differs from what we set
+        if current != self.current_dns:
+            logger.warning(
+                f"DNS overwrite detected! Expected: {self.current_dns}, "
+                f"Current: {current}"
+            )
+            return True
+        
+        return False
+
     def get_current_dns(self) -> Optional[Tuple[str, str]]:
         """
         Gets the current DNS configuration
@@ -533,9 +573,10 @@ class DNSChanger:
         return self.set_dns(dns1, dns2)
 
     def run(self):
-        """Starts the DNS rotation loop"""
+        """Starts the DNS rotation loop with VPN detection"""
         self.running = True
         logger.info(f"Starting DNS rotation every {self.interval} seconds")
+        paused = False
 
         try:
             # Initial rotation
@@ -544,7 +585,35 @@ class DNSChanger:
             # Main loop
             while self.running:
                 time.sleep(self.interval)
-                self.rotate_dns()
+                
+                # Check if DNS was overwritten
+                if self._dns_was_overwritten():
+                    if self._is_vpn_active():
+                        if not paused:
+                            logger.warning(
+                                "VPN detected with DNS overwrite. "
+                                "Pausing rotation to avoid conflicts."
+                            )
+                            paused = True
+                    else:
+                        if paused:
+                            logger.info(
+                                "DNS overwrite detected. "
+                                "Pausing rotation."
+                            )
+                            paused = True
+                else:
+                    if paused:
+                        logger.info("Resuming DNS rotation.")
+                        paused = False
+                
+                # Only rotate if not paused
+                if not paused:
+                    self.rotate_dns()
+                else:
+                    logger.debug(
+                        f"Rotation paused. Current DNS: {self.get_current_dns()}"
+                    )
 
         except KeyboardInterrupt:
             logger.info("Interrupted by user")
