@@ -219,6 +219,38 @@ launchctl unload ~/Library/LaunchAgents/com.dns-changer.daemon.plist
 launchctl load ~/Library/LaunchAgents/com.dns-changer.daemon.plist
 ```
 
+### Advanced Configuration
+
+For advanced customization, create a `config.json` file in one of these locations:
+
+```bash
+# System-wide configuration
+/etc/dns_changer/config.json
+
+# User configuration
+~/.dns_changer/config.json
+
+# Script directory
+./config.json
+```
+
+Copy the example configuration and customize it:
+
+```bash
+cp config.example.json config.json
+nano config.json
+```
+
+The configuration file allows you to customize:
+
+- **Rotation interval** - Change how often DNS servers rotate
+- **DNS servers** - Select which servers to use
+- **Logging** - Configure log retention and size limits
+- **Security** - Enable/disable validation and logging
+- **Daemon behavior** - Customize LaunchDaemon settings
+
+For detailed configuration options, see [ADVANCED_CONFIGURATION.md](ADVANCED_CONFIGURATION.md).
+
 ### Network Interface Detection
 
 The DNS Changer automatically detects your active network interface using a multi-strategy approach:

@@ -20,9 +20,10 @@ import logging.handlers
 import signal
 import atexit
 import socket
+import json
 from pathlib import Path
 from datetime import datetime, timedelta
-from typing import List, Tuple, Optional, Set
+from typing import List, Tuple, Optional, Set, Dict, Any
 
 # ============================================================================
 # LOGGING CONFIGURATION
@@ -147,6 +148,52 @@ DNS_SERVERS = [
     # Google
     ("8.8.8.8", "8.8.4.4"),
 ]
+
+# ============================================================================
+# CONFIGURATION LOADING
+# ============================================================================
+
+def load_config() -> Dict[str, Any]:
+    """
+    Load configuration from config.json if it exists.
+    Falls back to defaults if not found.
+    """
+    config_paths = [
+        Path("/etc/dns_changer/config.json"),
+        Path("/usr/local/etc/dns_changer/config.json"),
+        Path.home() / ".dns_changer" / "config.json",
+        Path(__file__).parent / "config.json",
+    ]
+    
+    for config_path in config_paths:
+        if config_path.exists():
+            try:
+                with open(config_path, 'r') as f:
+                    config = json.load(f)
+                    logger.info(f"Loaded configuration from {config_path}")
+                    return config.get("dns_changer", {})
+            except (json.JSONDecodeError, IOError) as e:
+                logger.warning(f"Failed to load config from {config_path}: {e}")
+    
+    logger.info("No configuration file found. Using defaults.")
+    return {}
+
+def get_config_value(config: Dict[str, Any], path: str, default: Any) -> Any:
+    """
+    Get a value from config dictionary using dot notation.
+    Example: get_config_value(config, "general.interval", 300)
+    """
+    keys = path.split(".")
+    value = config
+    for key in keys:
+        if isinstance(value, dict):
+            value = value.get(key)
+        else:
+            return default
+    return value if value is not None else default
+
+# Load configuration at startup
+CONFIG = load_config()
 
 # ============================================================================
 # DNS HEALTH CHECK FUNCTIONS
