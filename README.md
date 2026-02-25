@@ -13,7 +13,7 @@ solution.
 
 Interfaces, behavior and configuration details may change as the project evolves.
 
-Feedback, audits and contributions are highly welcome. **Use at your own risk!** Feedback and audits are welcome.
+Feedback, audits, and contributions are highly welcome. **Use at your own risk!**
 
 
 ## Origin and Credits
