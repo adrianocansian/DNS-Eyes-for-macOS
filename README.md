@@ -376,7 +376,7 @@ echo "$USER ALL=(ALL) NOPASSWD: /usr/sbin/networksetup" | sudo tee /etc/sudoers.
 ### Automatic Method
 
 ```bash
-bash ~/.dns_changer/uninstall.sh
+bash /var/log/dns_changer/uninstall.sh
 ```
 
 ### Manual Method
